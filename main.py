@@ -775,15 +775,6 @@ class MainWindow(QMainWindow):
 
     def show_and_raise(self):
         self.showNormal()
-        # 恢复窗口大小，确保内容完整显示
-        self.resize(580, 680)
-        # 强制重新计算布局
-        self.centralWidget().updateGeometry()
-        self.centralWidget().adjustSize()
-        self.updateGeometry()
-        self.adjustSize()
-        # 强制刷新
-        QApplication.processEvents()
         self.activateWindow()
         self.raise_()
 
@@ -1091,16 +1082,7 @@ class FloatingWindow(QWidget):
     def expand(self):
         self.set_pinned(False)
         self.hide()
-        # 确保主窗口完全显示后再调整
-        self.main_window.showNormal()
-        self.main_window.resize(580, 680)
-        self.main_window.centralWidget().updateGeometry()
-        self.main_window.centralWidget().adjustSize()
-        self.main_window.updateGeometry()
-        self.main_window.adjustSize()
-        QApplication.processEvents()
-        self.main_window.activateWindow()
-        self.main_window.raise_()
+        self.main_window.show_and_raise()
 
     def set_pinned(self, pinned: bool):
         self._pinned = pinned
