@@ -388,14 +388,18 @@ class SettingsDialog(QDialog):
     def auto_get_cookies(self):
         """自动从浏览器获取 Mimo Cookies"""
         import webbrowser
+        import threading
         from PyQt5.QtWidgets import QApplication
 
-        # 打开浏览器
-        webbrowser.open("https://platform.xiaomimimo.com/console/plan-manage")
+        def open_browser():
+            webbrowser.open("https://platform.xiaomimimo.com/console/plan-manage")
+
+        # 在新线程中打开浏览器，避免阻塞
+        threading.Thread(target=open_browser, daemon=True).start()
 
         # 提示用户操作
         reply = QMessageBox.information(self, "获取 Cookies",
-            "已打开浏览器，请按以下步骤操作：\n\n"
+            "正在打开浏览器，请按以下步骤操作：\n\n"
             "1. 在浏览器中登录 Mimo 平台\n"
             "2. 登录后，按 F12 打开开发者工具\n"
             "3. 切换到「Console」（控制台）标签\n"
@@ -417,7 +421,7 @@ class SettingsDialog(QDialog):
                     "剪贴板中没有有效的 Cookies。\n\n"
                     "请确保：\n"
                     "1. 已在 Console 中执行 copy(document.cookie)\n"
-                    "2. 执行后没有关闭浏览器标签页")
+                    "2. 执行后点击「已复制」按钮")
 
     def save(self):
         self.config["mimo_cookies"] = self.mimo_input.text().strip()
