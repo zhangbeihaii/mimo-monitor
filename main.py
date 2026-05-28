@@ -42,8 +42,8 @@ REFRESH_INTERVAL_MS = 5 * 60 * 1000
 
 CARD_STYLE = """
 QFrame#card {
-    background: rgba(255, 255, 255, 0.1);
-    border: 1px solid rgba(255, 255, 255, 0.15);
+    background: rgba(30, 30, 50, 0.6);
+    border: 1px solid rgba(255, 255, 255, 0.2);
     border-radius: 16px;
 }
 """
@@ -57,45 +57,45 @@ QLabel {
 }
 QPushButton {
     font-family: "Microsoft YaHei", "Segoe UI", sans-serif;
-    background: rgba(255, 255, 255, 0.15);
-    border: 1px solid rgba(255, 255, 255, 0.2);
+    background: rgba(30, 30, 50, 0.5);
+    border: 1px solid rgba(255, 255, 255, 0.25);
     border-radius: 12px;
     padding: 10px 24px;
     font-size: 13px;
     color: white;
 }
 QPushButton:hover {
-    background: rgba(255, 255, 255, 0.25);
-    border: 1px solid rgba(255, 255, 255, 0.3);
+    background: rgba(40, 40, 60, 0.6);
+    border: 1px solid rgba(255, 255, 255, 0.35);
 }
 QPushButton:pressed {
-    background: rgba(255, 255, 255, 0.1);
+    background: rgba(25, 25, 45, 0.5);
 }
 QPushButton#primary {
-    background: rgba(255, 255, 255, 0.2);
+    background: rgba(102, 126, 234, 0.6);
     color: white;
-    border: 1px solid rgba(255, 255, 255, 0.3);
+    border: 1px solid rgba(102, 126, 234, 0.8);
     font-weight: bold;
 }
 QPushButton#primary:hover {
-    background: rgba(255, 255, 255, 0.3);
+    background: rgba(102, 126, 234, 0.7);
 }
 QPushButton#refresh {
-    background: rgba(56, 239, 125, 0.3);
+    background: rgba(56, 239, 125, 0.4);
     color: white;
-    border: 1px solid rgba(56, 239, 125, 0.4);
+    border: 1px solid rgba(56, 239, 125, 0.6);
     font-weight: bold;
 }
 QPushButton#refresh:hover {
-    background: rgba(56, 239, 125, 0.4);
+    background: rgba(56, 239, 125, 0.5);
 }
 QPushButton#refresh:disabled {
-    background: rgba(56, 239, 125, 0.15);
+    background: rgba(56, 239, 125, 0.2);
 }
 QProgressBar {
     border: none;
     border-radius: 8px;
-    background: rgba(255, 255, 255, 0.1);
+    background: rgba(255, 255, 255, 0.15);
     height: 14px;
     text-align: center;
     font-size: 10px;
@@ -103,23 +103,23 @@ QProgressBar {
 }
 QProgressBar::chunk {
     border-radius: 8px;
-    background: rgba(255, 255, 255, 0.4);
+    background: rgba(102, 126, 234, 0.7);
 }
 QDialog {
-    background: rgba(30, 30, 50, 0.8);
+    background: rgba(30, 30, 50, 0.85);
     font-family: "Microsoft YaHei", "Segoe UI", sans-serif;
 }
 QLineEdit {
-    border: 1px solid rgba(255, 255, 255, 0.2);
+    border: 1px solid rgba(255, 255, 255, 0.25);
     border-radius: 12px;
     padding: 10px 16px;
     font-size: 13px;
-    background: rgba(255, 255, 255, 0.1);
+    background: rgba(30, 30, 50, 0.5);
     color: white;
 }
 QLineEdit:focus {
-    border: 2px solid rgba(255, 255, 255, 0.4);
-    background: rgba(255, 255, 255, 0.15);
+    border: 2px solid rgba(102, 126, 234, 0.6);
+    background: rgba(30, 30, 50, 0.6);
 }
 """
 
@@ -632,9 +632,9 @@ class MainWindow(QMainWindow):
         self.float_btn = QPushButton("悬浮窗")
         self.float_btn.setFixedHeight(30)
         self.float_btn.setStyleSheet("""
-            QPushButton { background: rgba(255, 255, 255, 0.2); border: 1px solid rgba(255, 255, 255, 0.3);
+            QPushButton { background: rgba(30, 30, 50, 0.5); border: 1px solid rgba(255, 255, 255, 0.25);
                           border-radius: 8px; padding: 6px 16px; font-size: 12px; color: white; }
-            QPushButton:hover { background: rgba(255, 255, 255, 0.3); }
+            QPushButton:hover { background: rgba(40, 40, 60, 0.6); }
         """)
         self.float_btn.clicked.connect(self.switch_to_float)
         header.addWidget(self.float_btn)
@@ -682,11 +682,11 @@ class MainWindow(QMainWindow):
                 break
         self.interval_combo.setStyleSheet("""
             QComboBox {
-                border: 1px solid rgba(255, 255, 255, 0.3);
+                border: 1px solid rgba(255, 255, 255, 0.25);
                 border-radius: 8px;
                 padding: 6px 12px;
                 font-size: 11px;
-                background: rgba(255, 255, 255, 0.2);
+                background: rgba(30, 30, 50, 0.5);
                 color: white;
             }
         """)
@@ -697,9 +697,9 @@ class MainWindow(QMainWindow):
         self.toggle_btn.setFixedWidth(50)
         self.toggle_btn.setStyleSheet("""
             font-size: 11px; padding: 6px 12px;
-            background: rgba(255, 255, 255, 0.2);
+            background: rgba(30, 30, 50, 0.5);
             color: white;
-            border: 1px solid rgba(255, 255, 255, 0.3);
+            border: 1px solid rgba(255, 255, 255, 0.25);
         """)
         self.toggle_btn.clicked.connect(self.toggle_auto)
         footer.addWidget(self.toggle_btn)
