@@ -386,42 +386,17 @@ class SettingsDialog(QDialog):
         layout.addLayout(btn_layout)
 
     def auto_get_cookies(self):
-        """自动从浏览器获取 Mimo Cookies"""
-        import subprocess
-        from PyQt5.QtWidgets import QApplication
-
-        # 打开浏览器
-        try:
-            subprocess.Popen(["cmd", "/c", "start", "https://platform.xiaomimimo.com/console/plan-manage"],
-                           shell=True, creationflags=subprocess.CREATE_NO_WINDOW)
-        except:
-            pass
-
-        # 提示用户操作
-        reply = QMessageBox.information(self, "获取 Cookies",
-            "正在打开浏览器，请按以下步骤操作：\n\n"
+        """打开浏览器让用户手动获取 Cookies"""
+        import webbrowser
+        webbrowser.open("https://platform.xiaomimimo.com/console/plan-manage")
+        QMessageBox.information(self, "获取 Cookies",
+            "已打开浏览器，请按以下步骤操作：\n\n"
             "1. 在浏览器中登录 Mimo 平台\n"
-            "2. 登录后，按 F12 打开开发者工具\n"
-            "3. 切换到「Console」（控制台）标签\n"
-            "4. 输入以下命令并按回车：\n\n"
-            "   copy(document.cookie)\n\n"
-            "5. 然后点击下方「已复制」按钮",
-            "已复制", "取消")
-
-        if reply == 0:  # 已复制按钮
-            # 从剪贴板读取
-            clipboard = QApplication.clipboard()
-            cookies_str = clipboard.text().strip()
-
-            if cookies_str and "=" in cookies_str:
-                self.mimo_input.setText(cookies_str)
-                QMessageBox.information(self, "成功", "Cookies 已获取！点击「保存」完成配置。")
-            else:
-                QMessageBox.warning(self, "失败",
-                    "剪贴板中没有有效的 Cookies。\n\n"
-                    "请确保：\n"
-                    "1. 已在 Console 中执行 copy(document.cookie)\n"
-                    "2. 执行后点击「已复制」按钮")
+            "2. 按 F12 打开开发者工具\n"
+            "3. 切换到「Application」标签\n"
+            "4. 左侧找到「Cookies」\n"
+            "5. 复制所有 cookie 值\n"
+            "6. 粘贴到下方输入框")
 
     def save(self):
         self.config["mimo_cookies"] = self.mimo_input.text().strip()
