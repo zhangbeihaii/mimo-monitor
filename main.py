@@ -330,24 +330,25 @@ class SettingsDialog(QDialog):
 
         self.mimo_input = QLineEdit(config.get("mimo_cookies", ""))
         self.mimo_input.setPlaceholderText("userId=xxx; api-platform_slh=xxx; api-platform_ph=xxx")
+        # 自动去除双引号
+        self.mimo_input.textChanged.connect(lambda text: self.mimo_input.setText(text.replace('"', '')) if '"' in text else None)
         form.addRow("Mimo Cookies:", self.mimo_input)
 
-        # 自动获取按钮
-        auto_btn_layout = QHBoxLayout()
-        auto_btn = QPushButton("自动获取 Cookies")
-        auto_btn.setStyleSheet("""
-            QPushButton { background: #34C759; color: white; border: none; border-radius: 6px;
+        # 获取教程按钮
+        help_btn_layout = QHBoxLayout()
+        help_btn = QPushButton("查看获取教程")
+        help_btn.setStyleSheet("""
+            QPushButton { background: #5856D6; color: white; border: none; border-radius: 6px;
                           padding: 8px 16px; font-size: 13px; }
-            QPushButton:hover { background: #2DA44E; }
+            QPushButton:hover { background: #4A48B8; }
         """)
-        auto_btn.clicked.connect(self.auto_get_cookies)
-        auto_btn_layout.addWidget(auto_btn)
-        auto_btn_layout.addStretch()
-        form.addRow("", auto_btn_layout)
+        help_btn.clicked.connect(self.show_cookie_tutorial)
+        help_btn_layout.addWidget(help_btn)
+        help_btn_layout.addStretch()
+        form.addRow("", help_btn_layout)
 
         hint = QLabel(
-            "点击「自动获取 Cookies」会打开浏览器，\n"
-            "登录后自动提取，无需手动复制。"
+            "点击「查看获取教程」查看详细步骤"
         )
         hint.setStyleSheet("color: #888; font-size: 11px;")
         hint.setWordWrap(True)
@@ -385,63 +386,20 @@ class SettingsDialog(QDialog):
         btn_layout.addWidget(save_btn)
         layout.addLayout(btn_layout)
 
-    def auto_get_cookies(self):
-        """自动获取 Cookies - 使用 Selenium"""
-        import threading
-
-        def extract():
-            try:
-                from selenium import webdriver
-                from selenium.webdriver.chrome.options import Options
-                from selenium.webdriver.support.ui import WebDriverWait
-                from selenium.webdriver.support import expected_conditions as EC
-
-                # 设置 Chrome 选项
-                options = Options()
-                options.add_argument("--start-maximized")
-                options.add_experimental_option("detach", True)  # 关闭脚本后浏览器保持打开
-
-                # 启动浏览器
-                driver = webdriver.Chrome(options=options)
-                driver.get("https://platform.xiaomimimo.com/console/plan-manage")
-
-                # 提示用户登录
-                QMessageBox.information(self, "自动获取 Cookies",
-                    "浏览器已打开，请在浏览器中登录 Mimo 平台。\n\n"
-                    "登录成功后，点击下方「已登录」按钮。")
-
-                # 等待用户点击已登录
-                reply = QMessageBox.question(self, "确认登录",
-                    "请确认已在浏览器中登录成功。\n\n"
-                    "点击「是」自动提取 Cookies。",
-                    QMessageBox.Yes | QMessageBox.No, QMessageBox.Yes)
-
-                if reply == QMessageBox.Yes:
-                    # 获取所有 cookies
-                    cookies = driver.get_cookies()
-                    cookies_list = []
-                    for cookie in cookies:
-                        # 去除双引号
-                        value = cookie['value'].strip('"')
-                        cookies_list.append(f"{cookie['name']}={value}")
-
-                    cookies_str = "; ".join(cookies_list)
-
-                    if cookies_str:
-                        self.mimo_input.setText(cookies_str)
-                        QMessageBox.information(self, "成功",
-                            "Cookies 已自动获取！\n\n"
-                            "点击「保存」完成配置。")
-                    else:
-                        QMessageBox.warning(self, "失败", "未获取到 Cookies，请重试。")
-
-                    # 关闭浏览器
-                    driver.quit()
-
-            except Exception as e:
-                QMessageBox.critical(self, "错误", f"获取失败：{str(e)}")
-
-        threading.Thread(target=extract, daemon=True).start()
+    def show_cookie_tutorial(self):
+        """显示获取 Cookies 的教程"""
+        QMessageBox.information(self, "获取 Cookies 教程",
+            "请按以下步骤获取 Cookies：\n\n"
+            "1. 打开浏览器，访问：\n"
+            "   https://platform.xiaomimimo.com/console/plan-manage\n\n"
+            "2. 登录你的 Mimo 账号\n\n"
+            "3. 按 F12 打开开发者工具\n\n"
+            "4. 切换到「Network」（网络）标签\n\n"
+            "5. 刷新页面（按 F5）\n\n"
+            "6. 在请求列表中找到「usage」请求\n\n"
+            "7. 点击该请求，查看「Headers」\n\n"
+            "8. 找到「Cookie」字段，复制其值\n\n"
+            "9. 粘贴到下方输入框（会自动去除双引号）")
 
     def save(self):
         self.config["mimo_cookies"] = self.mimo_input.text().strip()
