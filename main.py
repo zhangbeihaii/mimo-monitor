@@ -42,60 +42,65 @@ REFRESH_INTERVAL_MS = 5 * 60 * 1000
 
 CARD_STYLE = """
 QFrame#card {
-    background: rgba(30, 30, 50, 0.6);
-    border: 1px solid rgba(255, 255, 255, 0.2);
+    background: rgba(255, 255, 255, 0.7);
+    border: 1px solid rgba(255, 255, 255, 0.8);
     border-radius: 16px;
 }
 """
 
 GLOBAL_STYLE = """
 QMainWindow {
-    background: transparent;
+    background: qlineargradient(x1:0, y1:0, x2:1, y2:1,
+        stop:0 #667eea, stop:1 #764ba2);
 }
 QLabel {
     font-family: "Microsoft YaHei", "Segoe UI", sans-serif;
 }
 QPushButton {
     font-family: "Microsoft YaHei", "Segoe UI", sans-serif;
-    background: rgba(30, 30, 50, 0.5);
-    border: 1px solid rgba(255, 255, 255, 0.25);
+    background: rgba(255, 255, 255, 0.9);
+    border: 1px solid rgba(255, 255, 255, 0.5);
     border-radius: 12px;
     padding: 10px 24px;
     font-size: 13px;
-    color: white;
+    color: #333;
 }
 QPushButton:hover {
-    background: rgba(40, 40, 60, 0.6);
-    border: 1px solid rgba(255, 255, 255, 0.35);
+    background: rgba(255, 255, 255, 1);
+    border: 1px solid rgba(255, 255, 255, 0.8);
 }
 QPushButton:pressed {
-    background: rgba(25, 25, 45, 0.5);
+    background: rgba(240, 240, 245, 0.9);
 }
 QPushButton#primary {
-    background: rgba(102, 126, 234, 0.6);
+    background: qlineargradient(x1:0, y1:0, x2:1, y2:0,
+        stop:0 #667eea, stop:1 #764ba2);
     color: white;
-    border: 1px solid rgba(102, 126, 234, 0.8);
+    border: none;
     font-weight: bold;
 }
 QPushButton#primary:hover {
-    background: rgba(102, 126, 234, 0.7);
+    background: qlineargradient(x1:0, y1:0, x2:1, y2:0,
+        stop:0 #5a6fd6, stop:1 #6a4190);
 }
 QPushButton#refresh {
-    background: rgba(56, 239, 125, 0.4);
+    background: qlineargradient(x1:0, y1:0, x2:1, y2:0,
+        stop:0 #11998e, stop:1 #38ef7d);
     color: white;
-    border: 1px solid rgba(56, 239, 125, 0.6);
+    border: none;
     font-weight: bold;
 }
 QPushButton#refresh:hover {
-    background: rgba(56, 239, 125, 0.5);
+    background: qlineargradient(x1:0, y1:0, x2:1, y2:0,
+        stop:0 #0e8a7f, stop:1 #32d970);
 }
 QPushButton#refresh:disabled {
-    background: rgba(56, 239, 125, 0.2);
+    background: rgba(150, 220, 180, 0.6);
 }
 QProgressBar {
     border: none;
     border-radius: 8px;
-    background: rgba(255, 255, 255, 0.15);
+    background: rgba(255, 255, 255, 0.3);
     height: 14px;
     text-align: center;
     font-size: 10px;
@@ -103,23 +108,24 @@ QProgressBar {
 }
 QProgressBar::chunk {
     border-radius: 8px;
-    background: rgba(102, 126, 234, 0.7);
+    background: qlineargradient(x1:0, y1:0, x2:1, y2:0,
+        stop:0 #667eea, stop:1 #764ba2);
 }
 QDialog {
-    background: rgba(30, 30, 50, 0.85);
+    background: qlineargradient(x1:0, y1:0, x2:1, y2:1,
+        stop:0 #667eea, stop:1 #764ba2);
     font-family: "Microsoft YaHei", "Segoe UI", sans-serif;
 }
 QLineEdit {
-    border: 1px solid rgba(255, 255, 255, 0.25);
+    border: 1px solid rgba(255, 255, 255, 0.4);
     border-radius: 12px;
     padding: 10px 16px;
     font-size: 13px;
-    background: rgba(30, 30, 50, 0.5);
-    color: white;
+    background: rgba(255, 255, 255, 0.8);
 }
 QLineEdit:focus {
-    border: 2px solid rgba(102, 126, 234, 0.6);
-    background: rgba(30, 30, 50, 0.6);
+    border: 2px solid rgba(255, 255, 255, 0.8);
+    background: rgba(255, 255, 255, 0.95);
 }
 """
 
@@ -174,11 +180,11 @@ def make_card() -> QFrame:
     return card
 
 
-def make_info_row(label_text: str, color: str = "rgba(255, 255, 255, 0.7)") -> tuple:
+def make_info_row(label_text: str, color: str = "#666") -> tuple:
     """创建一行：标签 + 数值"""
     row = QHBoxLayout()
     lbl = QLabel(label_text)
-    lbl.setStyleSheet(f"font-size: 13px; color: rgba(255, 255, 255, 0.5);")
+    lbl.setStyleSheet(f"font-size: 13px; color: rgba(0, 0, 0, 0.5);")
     val = QLabel("--")
     val.setStyleSheet(f"font-size: 13px; font-weight: bold; color: {color};")
     val.setAlignment(Qt.AlignRight | Qt.AlignVCenter)
@@ -203,12 +209,12 @@ def make_section_bar(title: str, color: str) -> tuple:
     layout.addWidget(title_lbl)
 
     big = QLabel("--")
-    big.setStyleSheet(f"font-size: 32px; font-weight: bold; color: white;")
+    big.setStyleSheet(f"font-size: 32px; font-weight: bold; color: #1D1D1F;")
     big.setAlignment(Qt.AlignCenter)
     layout.addWidget(big)
 
     sub = QLabel("")
-    sub.setStyleSheet("font-size: 12px; color: rgba(255, 255, 255, 0.5);")
+    sub.setStyleSheet("font-size: 12px; color: rgba(0, 0, 0, 0.5);")
     sub.setAlignment(Qt.AlignCenter)
     layout.addWidget(sub)
 
@@ -218,7 +224,7 @@ def make_section_bar(title: str, color: str) -> tuple:
     bar.setTextVisible(False)
     bar.setFixedHeight(8)
     bar.setStyleSheet(f"""
-        QProgressBar {{ background: rgba(255, 255, 255, 0.1); border-radius: 4px; }}
+        QProgressBar {{ background: rgba(0, 0, 0, 0.1); border-radius: 4px; }}
         QProgressBar::chunk {{ background: {color}; border-radius: 4px; }}
     """)
     layout.addWidget(bar)
@@ -434,19 +440,19 @@ class MimoDetail(QWidget):
         delta_layout.setContentsMargins(16, 12, 16, 12)
 
         delta_plan_lbl = QLabel("套餐本次新增:")
-        delta_plan_lbl.setStyleSheet("font-size: 12px; color: rgba(255, 255, 255, 0.5);")
+        delta_plan_lbl.setStyleSheet("font-size: 12px; color: rgba(0, 0, 0, 0.5);")
         delta_layout.addWidget(delta_plan_lbl)
         self.delta_plan_val = QLabel("--")
-        self.delta_plan_val.setStyleSheet("font-size: 14px; font-weight: bold; color: #ffd43b;")
+        self.delta_plan_val.setStyleSheet("font-size: 14px; font-weight: bold; color: #FF9500;")
         delta_layout.addWidget(self.delta_plan_val)
 
         delta_layout.addStretch()
 
         delta_comp_lbl = QLabel("补偿本次新增:")
-        delta_comp_lbl.setStyleSheet("font-size: 12px; color: rgba(255, 255, 255, 0.5);")
+        delta_comp_lbl.setStyleSheet("font-size: 12px; color: rgba(0, 0, 0, 0.5);")
         delta_layout.addWidget(delta_comp_lbl)
         self.delta_comp_val = QLabel("--")
-        self.delta_comp_val.setStyleSheet("font-size: 14px; font-weight: bold; color: #748ffc;")
+        self.delta_comp_val.setStyleSheet("font-size: 14px; font-weight: bold; color: #5856D6;")
         delta_layout.addWidget(self.delta_comp_val)
 
         layout.addWidget(delta_card)
@@ -470,13 +476,13 @@ class MimoDetail(QWidget):
         info_layout.setContentsMargins(16, 10, 16, 10)
 
         self.plan_name_lbl = QLabel("套餐: --")
-        self.plan_name_lbl.setStyleSheet("font-size: 12px; color: rgba(255, 255, 255, 0.6);")
+        self.plan_name_lbl.setStyleSheet("font-size: 12px; color: rgba(0, 0, 0, 0.6);")
         info_layout.addWidget(self.plan_name_lbl)
 
         info_layout.addStretch()
 
         self.expire_lbl = QLabel("有效期: --")
-        self.expire_lbl.setStyleSheet("font-size: 12px; color: rgba(255, 255, 255, 0.6);")
+        self.expire_lbl.setStyleSheet("font-size: 12px; color: rgba(0, 0, 0, 0.6);")
         info_layout.addWidget(self.expire_lbl)
 
         layout.addWidget(info_card)
@@ -519,12 +525,12 @@ class MimoDetail(QWidget):
                 self.delta_plan_val.setStyleSheet("font-size: 14px; font-weight: bold; color: #ff6b6b;")
             else:
                 self.delta_plan_val.setText(f"{delta_plan:,}")
-                self.delta_plan_val.setStyleSheet("font-size: 14px; font-weight: bold; color: #69db7c;")
+                self.delta_plan_val.setStyleSheet("font-size: 14px; font-weight: bold; color: #51cf66;")
         self.last_plan_used = plan_used
 
         self.plan_big.setText(f"{plan_remain:,}")
         self.plan_sub.setText(f"套餐剩余  (已用 {plan_pct_display}%)")
-        self.plan_sub.setStyleSheet("font-size: 12px; color: rgba(255, 255, 255, 0.5);")
+        self.plan_sub.setStyleSheet("font-size: 12px; color: rgba(0, 0, 0, 0.5);")
         self.plan_bar.setValue(int((1 - plan_pct_used) * 100) if plan_limit > 0 else 0)
         self.plan_used.setText(f"{plan_used:,}")
         self.plan_limit.setText(f"{plan_limit:,}")
@@ -546,12 +552,12 @@ class MimoDetail(QWidget):
                 self.delta_comp_val.setStyleSheet("font-size: 14px; font-weight: bold; color: #ff6b6b;")
             else:
                 self.delta_comp_val.setText(f"{delta_comp:,}")
-                self.delta_comp_val.setStyleSheet("font-size: 14px; font-weight: bold; color: #69db7c;")
+                self.delta_comp_val.setStyleSheet("font-size: 14px; font-weight: bold; color: #51cf66;")
         self.last_comp_used = comp_used
 
         self.comp_big.setText(f"{comp_remain:,}")
         self.comp_sub.setText(f"补偿剩余  (已用 {comp_pct_display}%)")
-        self.comp_sub.setStyleSheet("font-size: 12px; color: rgba(255, 255, 255, 0.5);")
+        self.comp_sub.setStyleSheet("font-size: 12px; color: rgba(0, 0, 0, 0.5);")
         self.comp_bar.setValue(int((1 - comp_pct_used) * 100) if comp_limit > 0 else 0)
         self.comp_used.setText(f"{comp_used:,}")
         self.comp_limit.setText(f"{comp_limit:,}")
@@ -612,11 +618,7 @@ class MainWindow(QMainWindow):
         self._last_data = {}
         self.float_win = FloatingWindow(self)
 
-        # 启用 Windows 毛玻璃效果
-        self.enable_blur_behind()
-
         central = QWidget()
-        central.setStyleSheet("background: transparent;")
         self.setCentralWidget(central)
         main_layout = QVBoxLayout(central)
         main_layout.setContentsMargins(20, 12, 20, 20)
@@ -632,9 +634,9 @@ class MainWindow(QMainWindow):
         self.float_btn = QPushButton("悬浮窗")
         self.float_btn.setFixedHeight(30)
         self.float_btn.setStyleSheet("""
-            QPushButton { background: rgba(30, 30, 50, 0.5); border: 1px solid rgba(255, 255, 255, 0.25);
+            QPushButton { background: rgba(255, 255, 255, 0.2); border: 1px solid rgba(255, 255, 255, 0.3);
                           border-radius: 8px; padding: 6px 16px; font-size: 12px; color: white; }
-            QPushButton:hover { background: rgba(40, 40, 60, 0.6); }
+            QPushButton:hover { background: rgba(255, 255, 255, 0.3); }
         """)
         self.float_btn.clicked.connect(self.switch_to_float)
         header.addWidget(self.float_btn)
@@ -682,11 +684,11 @@ class MainWindow(QMainWindow):
                 break
         self.interval_combo.setStyleSheet("""
             QComboBox {
-                border: 1px solid rgba(255, 255, 255, 0.25);
+                border: 1px solid rgba(255, 255, 255, 0.3);
                 border-radius: 8px;
                 padding: 6px 12px;
                 font-size: 11px;
-                background: rgba(30, 30, 50, 0.5);
+                background: rgba(255, 255, 255, 0.2);
                 color: white;
             }
         """)
@@ -697,9 +699,9 @@ class MainWindow(QMainWindow):
         self.toggle_btn.setFixedWidth(50)
         self.toggle_btn.setStyleSheet("""
             font-size: 11px; padding: 6px 12px;
-            background: rgba(30, 30, 50, 0.5);
+            background: rgba(255, 255, 255, 0.2);
             color: white;
-            border: 1px solid rgba(255, 255, 255, 0.25);
+            border: 1px solid rgba(255, 255, 255, 0.3);
         """)
         self.toggle_btn.clicked.connect(self.toggle_auto)
         footer.addWidget(self.toggle_btn)
@@ -723,38 +725,7 @@ class MainWindow(QMainWindow):
         # 首次加载
         QTimer.singleShot(500, self.refresh)
 
-    def enable_blur_behind(self):
-        """启用 Windows 毛玻璃效果"""
-        try:
-            import ctypes
-            from ctypes import wintypes
 
-            # Windows DWM API
-            dwmapi = ctypes.windll.dwmapi
-
-            # DWM_BLURBEHIND 结构
-            class DWM_BLURBEHIND(ctypes.Structure):
-                _fields_ = [
-                    ("dwFlags", wintypes.DWORD),
-                    ("fEnable", wintypes.BOOL),
-                    ("hRgnBlur", wintypes.HRGN),
-                    ("fTransitionOnMaximized", wintypes.BOOL),
-                ]
-
-            # 获取窗口句柄
-            hwnd = int(self.winId())
-
-            # 启用模糊
-            bb = DWM_BLURBEHIND()
-            bb.dwFlags = 0x00000001  # DWM_BB_ENABLE
-            bb.fEnable = True
-            bb.hRgnBlur = None
-            bb.fTransitionOnMaximized = False
-
-            dwmapi.DwmEnableBlurBehindWindow(hwnd, ctypes.byref(bb))
-
-        except Exception as e:
-            print(f"启用毛玻璃效果失败: {e}")
 
     def setup_tray(self):
         self.tray = QSystemTrayIcon(self)
