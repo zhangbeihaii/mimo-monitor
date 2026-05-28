@@ -399,7 +399,7 @@ class SettingsDialog(QDialog):
                     "即将打开浏览器，请在浏览器中登录 Mimo 平台。\n"
                     "登录完成后点击「确定」继续。")
 
-                webbrowser.open("https://platform.xiaomimimo.com")
+                webbrowser.open("https://platform.xiaomimimo.com/console/plan-manage")
 
                 # 等待用户确认已登录
                 reply = QMessageBox.question(self, "确认登录",
