@@ -387,15 +387,15 @@ class SettingsDialog(QDialog):
 
     def auto_get_cookies(self):
         """自动从浏览器获取 Mimo Cookies"""
-        import webbrowser
-        import threading
+        import subprocess
         from PyQt5.QtWidgets import QApplication
 
-        def open_browser():
-            webbrowser.open("https://platform.xiaomimimo.com/console/plan-manage")
-
-        # 在新线程中打开浏览器，避免阻塞
-        threading.Thread(target=open_browser, daemon=True).start()
+        # 打开浏览器
+        try:
+            subprocess.Popen(["cmd", "/c", "start", "https://platform.xiaomimimo.com/console/plan-manage"],
+                           shell=True, creationflags=subprocess.CREATE_NO_WINDOW)
+        except:
+            pass
 
         # 提示用户操作
         reply = QMessageBox.information(self, "获取 Cookies",
