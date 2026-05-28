@@ -26,7 +26,7 @@ from PyQt5.QtWidgets import (
     QSizePolicy,
 )
 
-from api import deepseek, mimo
+from api import mimo
 from database import save_snapshot, get_history
 from chart import TrendChart
 
@@ -327,10 +327,6 @@ class SettingsDialog(QDialog):
         form = QFormLayout()
         form.setSpacing(12)
 
-        self.deepseek_input = QLineEdit(config.get("deepseek_api_key", ""))
-        self.deepseek_input.setPlaceholderText("sk-...")
-        form.addRow("DeepSeek API Key:", self.deepseek_input)
-
         self.mimo_input = QLineEdit(config.get("mimo_cookies", ""))
         self.mimo_input.setPlaceholderText("userId=xxx; api-platform_slh=xxx; api-platform_ph=xxx")
         form.addRow("Mimo Cookies:", self.mimo_input)
@@ -376,117 +372,10 @@ class SettingsDialog(QDialog):
         layout.addLayout(btn_layout)
 
     def save(self):
-        self.config["deepseek_api_key"] = self.deepseek_input.text().strip()
         self.config["mimo_cookies"] = self.mimo_input.text().strip()
         self.config["close_action"] = "minimize" if self.close_combo.currentIndex() == 0 else "exit"
         save_config(self.config)
         self.accept()
-
-
-# ---------- DeepSeek 详情面板 ----------
-
-class DeepSeekDetail(QWidget):
-    def __init__(self, parent=None):
-        super().__init__(parent)
-        layout = QVBoxLayout(self)
-        layout.setContentsMargins(0, 0, 0, 0)
-        layout.setSpacing(12)
-
-        # 余额卡片
-        balance_card = QFrame()
-        balance_card.setObjectName("card")
-        balance_card.setStyleSheet(CARD_STYLE)
-        balance_card.setGraphicsEffect(make_shadow())
-        bc_layout = QVBoxLayout(balance_card)
-        bc_layout.setContentsMargins(24, 20, 24, 20)
-        bc_layout.setSpacing(10)
-
-        self.status_dot = QLabel("● --")
-        self.status_dot.setStyleSheet("font-size: 12px; color: #888;")
-        bc_layout.addWidget(self.status_dot)
-
-        self.total_label = QLabel("--")
-        self.total_label.setStyleSheet("font-size: 36px; font-weight: bold; color: #1D1D1F;")
-        self.total_label.setAlignment(Qt.AlignCenter)
-        bc_layout.addWidget(self.total_label)
-
-        self.total_sub = QLabel("总余额")
-        self.total_sub.setStyleSheet("font-size: 13px; color: #888;")
-        self.total_sub.setAlignment(Qt.AlignCenter)
-        bc_layout.addWidget(self.total_sub)
-
-        # 分项
-        sep = QFrame()
-        sep.setFrameShape(QFrame.HLine)
-        sep.setStyleSheet("color: #E8E8ED;")
-        bc_layout.addWidget(sep)
-
-        row_granted, self.granted_val = make_info_row("赠送余额")
-        row_topped, self.topped_val = make_info_row("充值余额")
-        bc_layout.addLayout(row_granted)
-        bc_layout.addLayout(row_topped)
-
-        layout.addWidget(balance_card)
-
-        # 图表
-        self.chart = TrendChart()
-        chart_card = make_card()
-        chart_layout = QVBoxLayout(chart_card)
-        chart_layout.setContentsMargins(8, 8, 8, 8)
-        chart_layout.addWidget(self.chart)
-        layout.addWidget(chart_card)
-
-        layout.addStretch()
-
-    def update_data(self, data: dict):
-        if "error" in data:
-            self.status_dot.setText("● 连接失败")
-            self.status_dot.setStyleSheet("font-size: 12px; color: #FF3B30;")
-            self.total_label.setText("--")
-            self.granted_val.setText(data["error"])
-            self.granted_val.setStyleSheet("font-size: 13px; font-weight: bold; color: #FF3B30;")
-            self.topped_val.setText("--")
-            return
-
-        info = data
-        balance_infos = info.get("balance_infos", [])
-        available = info.get("is_available", False)
-
-        self.status_dot.setText(f"● {'可用' if available else '不可用'}")
-        self.status_dot.setStyleSheet(f"font-size: 12px; color: {'#34C759' if available else '#FF3B30'};")
-
-        if balance_infos:
-            b = balance_infos[0]
-            total = b.get("total_balance", "0")
-            granted = b.get("granted_balance", "0")
-            topped = b.get("topped_up_balance", "0")
-            currency = b.get("currency", "CNY")
-
-            self.total_label.setText(f"{total} {currency}")
-            self.granted_val.setText(f"{granted} {currency}")
-            self.topped_val.setText(f"{topped} {currency}")
-            self.granted_val.setStyleSheet("font-size: 13px; font-weight: bold; color: #333;")
-            self.topped_val.setStyleSheet("font-size: 13px; font-weight: bold; color: #333;")
-
-            save_snapshot("deepseek", balance=float(total))
-        else:
-            self.total_label.setText("--")
-            self.granted_val.setText("--")
-            self.topped_val.setText("--")
-
-        # 图表
-        history = get_history("deepseek", days=7)
-        if len(history) >= 2:
-            chart_data = [(row[0], row[3]) for row in history]  # balance
-            self.chart.set_data(chart_data, "DeepSeek 余额趋势 (7天)", "#007AFF")
-
-    def set_unconfigured(self):
-        self.status_dot.setText("● 未配置")
-        self.status_dot.setStyleSheet("font-size: 12px; color: #FF9500;")
-        self.total_label.setText("--")
-        self.total_sub.setText("请在设置中填写 DeepSeek API Key")
-        self.granted_val.setText("--")
-        self.topped_val.setText("--")
 
 
 # ---------- Mimo 详情面板 ----------
@@ -1042,25 +931,6 @@ class FloatingWindow(QWidget):
             self.pct_lbl.setText("")
             self.bar.set_percent(0)
             self.type_lbl.setText("")
-
-            if "deepseek" in data and "balance_infos" in data["deepseek"]:
-                b = data["deepseek"]["balance_infos"]
-                if b:
-                    total = b[0].get("total_balance", "0")
-                    currency = b[0].get("currency", "CNY")
-                    self.val_lbl.setText(f"{total} {currency}")
-                    available = data["deepseek"].get("is_available", False)
-                    self.pct_lbl.setText("可用" if available else "不可用")
-                    self.pct_lbl.setStyleSheet(f"font-size: 12px; color: {'#34C759' if available else '#FF3B30'};")
-                    self.bar.set_percent(100 if available else 0)
-            elif "deepseek_error" in data:
-                self.val_lbl.setText("错误")
-                self.pct_lbl.setText("")
-                self.bar.set_percent(0)
-            else:
-                self.val_lbl.setText("未配置")
-                self.pct_lbl.setText("")
-                self.bar.set_percent(0)
 
     def _show_menu(self, pos):
         menu = QMenu(self)
