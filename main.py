@@ -413,9 +413,38 @@ class SettingsDialog(QDialog):
 class MimoDetail(QWidget):
     def __init__(self, parent=None):
         super().__init__(parent)
+        self.last_plan_used = None
+        self.last_comp_used = None
+
         layout = QVBoxLayout(self)
         layout.setContentsMargins(0, 0, 0, 0)
         layout.setSpacing(12)
+
+        # 本次新增卡片
+        delta_card = QFrame()
+        delta_card.setObjectName("card")
+        delta_card.setStyleSheet(CARD_STYLE)
+        delta_card.setGraphicsEffect(make_shadow())
+        delta_layout = QHBoxLayout(delta_card)
+        delta_layout.setContentsMargins(16, 12, 16, 12)
+
+        delta_plan_lbl = QLabel("套餐本次新增:")
+        delta_plan_lbl.setStyleSheet("font-size: 12px; color: #888;")
+        delta_layout.addWidget(delta_plan_lbl)
+        self.delta_plan_val = QLabel("--")
+        self.delta_plan_val.setStyleSheet("font-size: 14px; font-weight: bold; color: #FF9500;")
+        delta_layout.addWidget(self.delta_plan_val)
+
+        delta_layout.addStretch()
+
+        delta_comp_lbl = QLabel("补偿本次新增:")
+        delta_comp_lbl.setStyleSheet("font-size: 12px; color: #888;")
+        delta_layout.addWidget(delta_comp_lbl)
+        self.delta_comp_val = QLabel("--")
+        self.delta_comp_val.setStyleSheet("font-size: 14px; font-weight: bold; color: #5856D6;")
+        delta_layout.addWidget(self.delta_comp_val)
+
+        layout.addWidget(delta_card)
 
         # 套餐总量
         self.plan_section, self.plan_big, self.plan_sub, self.plan_bar, \
@@ -477,6 +506,17 @@ class MimoDetail(QWidget):
         plan_pct_display = round(plan_pct_used * 100, 2)
         save_snapshot("mimo_plan", used=plan_used, total=plan_limit)
 
+        # 计算套餐本次新增
+        if self.last_plan_used is not None:
+            delta_plan = plan_used - self.last_plan_used
+            if delta_plan >= 0:
+                self.delta_plan_val.setText(f"+{delta_plan:,}")
+                self.delta_plan_val.setStyleSheet("font-size: 14px; font-weight: bold; color: #FF3B30;")
+            else:
+                self.delta_plan_val.setText(f"{delta_plan:,}")
+                self.delta_plan_val.setStyleSheet("font-size: 14px; font-weight: bold; color: #34C759;")
+        self.last_plan_used = plan_used
+
         self.plan_big.setText(f"{plan_remain:,}")
         self.plan_sub.setText(f"套餐剩余  (已用 {plan_pct_display}%)")
         self.plan_sub.setStyleSheet("font-size: 12px; color: #888;")
@@ -492,6 +532,17 @@ class MimoDetail(QWidget):
         comp_pct_used = info.get("comp_percent", 0)
         comp_pct_display = round(comp_pct_used * 100, 2)
         save_snapshot("mimo_comp", used=comp_used, total=comp_limit)
+
+        # 计算补偿本次新增
+        if self.last_comp_used is not None:
+            delta_comp = comp_used - self.last_comp_used
+            if delta_comp >= 0:
+                self.delta_comp_val.setText(f"+{delta_comp:,}")
+                self.delta_comp_val.setStyleSheet("font-size: 14px; font-weight: bold; color: #FF3B30;")
+            else:
+                self.delta_comp_val.setText(f"{delta_comp:,}")
+                self.delta_comp_val.setStyleSheet("font-size: 14px; font-weight: bold; color: #34C759;")
+        self.last_comp_used = comp_used
 
         self.comp_big.setText(f"{comp_remain:,}")
         self.comp_sub.setText(f"补偿剩余  (已用 {comp_pct_display}%)")
