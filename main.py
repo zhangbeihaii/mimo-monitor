@@ -14,6 +14,7 @@ from PyQt5.QtWidgets import (
     QLineEdit,
     QMainWindow,
     QMenu,
+    QMessageBox,
     QProgressBar,
     QPushButton,
     QSystemTrayIcon,
@@ -331,9 +332,22 @@ class SettingsDialog(QDialog):
         self.mimo_input.setPlaceholderText("userId=xxx; api-platform_slh=xxx; api-platform_ph=xxx")
         form.addRow("Mimo Cookies:", self.mimo_input)
 
+        # 自动获取按钮
+        auto_btn_layout = QHBoxLayout()
+        auto_btn = QPushButton("自动获取 Cookies")
+        auto_btn.setStyleSheet("""
+            QPushButton { background: #34C759; color: white; border: none; border-radius: 6px;
+                          padding: 8px 16px; font-size: 13px; }
+            QPushButton:hover { background: #2DA44E; }
+        """)
+        auto_btn.clicked.connect(self.auto_get_cookies)
+        auto_btn_layout.addWidget(auto_btn)
+        auto_btn_layout.addStretch()
+        form.addRow("", auto_btn_layout)
+
         hint = QLabel(
-            "Mimo需要Cookie认证。登录 platform.xiaomimimo.com 后\n"
-            "F12 → Application → Cookies → 复制完整cookie值"
+            "点击「自动获取 Cookies」会打开浏览器，\n"
+            "登录后自动提取，无需手动复制。"
         )
         hint.setStyleSheet("color: #888; font-size: 11px;")
         hint.setWordWrap(True)
@@ -370,6 +384,56 @@ class SettingsDialog(QDialog):
         btn_layout.addWidget(cancel_btn)
         btn_layout.addWidget(save_btn)
         layout.addLayout(btn_layout)
+
+    def auto_get_cookies(self):
+        """自动从浏览器获取 Mimo Cookies"""
+        import webbrowser
+        import threading
+
+        def extract_cookies():
+            try:
+                import browser_cookie3
+
+                # 等待用户在浏览器中登录
+                QMessageBox.information(self, "提示",
+                    "即将打开浏览器，请在浏览器中登录 Mimo 平台。\n"
+                    "登录完成后点击「确定」继续。")
+
+                webbrowser.open("https://platform.xiaomimimo.com")
+
+                # 等待用户确认已登录
+                reply = QMessageBox.question(self, "确认登录",
+                    "请确认已在浏览器中登录 Mimo 平台。\n"
+                    "点击「是」自动提取 Cookies。",
+                    QMessageBox.Yes | QMessageBox.No, QMessageBox.Yes)
+
+                if reply == QMessageBox.Yes:
+                    # 尝试从不同浏览器提取 cookies
+                    cookies_str = ""
+                    for browser_fn in [browser_cookie3.chrome, browser_cookie3.edge, browser_cookie3.firefox]:
+                        try:
+                            cj = browser_cookie3(domain_name=".xiaomimimo.com", browser=browser_fn)
+                            cookies_str = "; ".join([f"{c.name}={c.value}" for c in cj])
+                            if cookies_str:
+                                break
+                        except:
+                            continue
+
+                    if cookies_str:
+                        self.mimo_input.setText(cookies_str)
+                        QMessageBox.information(self, "成功", "Cookies 已自动获取！")
+                    else:
+                        QMessageBox.warning(self, "失败",
+                            "未找到 Cookies，请确保：\n"
+                            "1. 已在浏览器中登录 Mimo\n"
+                            "2. 浏览器已关闭（Chrome/Edge 需要关闭）\n"
+                            "3. 或手动复制 Cookies")
+
+            except Exception as e:
+                QMessageBox.critical(self, "错误", f"获取 Cookies 失败：{str(e)}")
+
+        # 在新线程中执行，避免阻塞 UI
+        threading.Thread(target=extract_cookies, daemon=True).start()
 
     def save(self):
         self.config["mimo_cookies"] = self.mimo_input.text().strip()
