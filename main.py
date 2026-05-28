@@ -775,6 +775,8 @@ class MainWindow(QMainWindow):
 
     def show_and_raise(self):
         self.showNormal()
+        # 恢复窗口大小，确保内容完整显示
+        self.resize(580, 680)
         self.activateWindow()
         self.raise_()
 
