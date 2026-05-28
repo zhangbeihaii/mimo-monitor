@@ -389,46 +389,64 @@ class SettingsDialog(QDialog):
         """自动从浏览器获取 Mimo Cookies"""
         import webbrowser
         import threading
+        import time
 
         def extract_cookies():
             try:
                 import browser_cookie3
 
-                # 等待用户在浏览器中登录
-                QMessageBox.information(self, "提示",
-                    "即将打开浏览器，请在浏览器中登录 Mimo 平台。\n"
-                    "登录完成后点击「确定」继续。")
-
+                # 打开浏览器
                 webbrowser.open("https://platform.xiaomimimo.com/console/plan-manage")
 
-                # 等待用户确认已登录
-                reply = QMessageBox.question(self, "确认登录",
-                    "请确认已在浏览器中登录 Mimo 平台。\n"
-                    "点击「是」自动提取 Cookies。",
+                # 等待用户登录
+                reply = QMessageBox.question(self, "自动获取 Cookies",
+                    "已打开浏览器，请按以下步骤操作：\n\n"
+                    "1. 在浏览器中登录 Mimo 平台\n"
+                    "2. 登录成功后，保持页面打开\n"
+                    "3. 点击「是」自动提取\n\n"
+                    "提示：如果提取失败，会提示你手动复制。",
                     QMessageBox.Yes | QMessageBox.No, QMessageBox.Yes)
 
                 if reply == QMessageBox.Yes:
                     # 尝试从不同浏览器提取 cookies
                     cookies_str = ""
-                    for browser_fn in [browser_cookie3.chrome, browser_cookie3.edge, browser_cookie3.firefox]:
+                    browsers = [
+                        ("Chrome", browser_cookie3.chrome),
+                        ("Edge", browser_cookie3.edge),
+                        ("Firefox", browser_cookie3.firefox),
+                    ]
+
+                    for browser_name, browser_fn in browsers:
                         try:
                             cj = browser_cookie3(domain_name=".xiaomimimo.com", browser=browser_fn)
-                            cookies_str = "; ".join([f"{c.name}={c.value}" for c in cj])
-                            if cookies_str:
+                            cookies_list = [f"{c.name}={c.value}" for c in cj]
+                            if cookies_list:
+                                cookies_str = "; ".join(cookies_list)
                                 break
-                        except:
+                        except Exception as e:
                             continue
 
                     if cookies_str:
                         self.mimo_input.setText(cookies_str)
-                        QMessageBox.information(self, "成功", "Cookies 已自动获取！")
+                        QMessageBox.information(self, "成功",
+                            "Cookies 已自动获取！\n\n"
+                            "点击「保存」完成配置。")
                     else:
-                        QMessageBox.warning(self, "失败",
-                            "未找到 Cookies，请确保：\n"
-                            "1. 已在浏览器中登录 Mimo\n"
-                            "2. 浏览器已关闭（Chrome/Edge 需要关闭）\n"
-                            "3. 或手动复制 Cookies")
+                        # 提取失败，提供手动复制的指导
+                        QMessageBox.warning(self, "自动获取失败",
+                            "无法自动提取 Cookies，可能原因：\n"
+                            "- 浏览器正在运行（Chrome/Edge 需要关闭）\n"
+                            "- 尚未登录 Mimo 平台\n\n"
+                            "请手动复制 Cookies：\n"
+                            "1. 在浏览器中按 F12\n"
+                            "2. 切换到「Application」标签\n"
+                            "3. 左侧找到「Cookies」\n"
+                            "4. 复制所有 cookie 值")
 
+            except ImportError:
+                QMessageBox.critical(self, "错误",
+                    "缺少 browser_cookie3 库。\n"
+                    "请运行：pip install browser_cookie3")
             except Exception as e:
                 QMessageBox.critical(self, "错误", f"获取 Cookies 失败：{str(e)}")
 
