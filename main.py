@@ -30,7 +30,13 @@ from api import deepseek, mimo
 from database import save_snapshot, get_history
 from chart import TrendChart
 
-CONFIG_FILE = os.path.join(os.path.dirname(os.path.abspath(__file__)), "config.json")
+APP_NAME = "MiMoMonitor"
+if os.name == 'nt':  # Windows
+    CONFIG_DIR = os.path.join(os.environ.get('APPDATA', os.path.expanduser('~')), APP_NAME)
+else:
+    CONFIG_DIR = os.path.join(os.path.expanduser('~'), '.config', APP_NAME)
+os.makedirs(CONFIG_DIR, exist_ok=True)
+CONFIG_FILE = os.path.join(CONFIG_DIR, "config.json")
 REFRESH_INTERVAL_MS = 5 * 60 * 1000
 
 CARD_STYLE = """
@@ -621,6 +627,10 @@ class MainWindow(QMainWindow):
         super().__init__()
         self.setWindowTitle("MiMo Monitor v1.2")
         self.setMinimumSize(580, 680)
+        # 设置窗口图标
+        icon_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "icon.ico")
+        if os.path.exists(icon_path):
+            self.setWindowIcon(QIcon(icon_path))
         self.config = load_config()
         self.worker = None
         self.auto_refresh = True
@@ -753,12 +763,16 @@ class MainWindow(QMainWindow):
         self.pin_action.setVisible(is_pinned)
 
     def _make_tray_icon(self):
+        icon_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "icon.ico")
+        if os.path.exists(icon_path):
+            return QIcon(icon_path)
+        # 备用方案：程序生成图标
         pix = QPixmap(32, 32)
         pix.fill(QColor(0, 122, 255))
         p = QPainter(pix)
         p.setPen(QPen(Qt.white, 2))
         p.setFont(QFont("Arial", 16, QFont.Bold))
-        p.drawText(pix.rect(), Qt.AlignCenter, "T")
+        p.drawText(pix.rect(), Qt.AlignCenter, "M")
         p.end()
         return QIcon(pix)
 
@@ -1139,6 +1153,10 @@ def main():
     app.setStyle("Fusion")
     app.setStyleSheet(GLOBAL_STYLE)
     app.setQuitOnLastWindowClosed(False)
+    # 设置应用图标
+    icon_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "icon.ico")
+    if os.path.exists(icon_path):
+        app.setWindowIcon(QIcon(icon_path))
     window = MainWindow()
     window.show()
     sys.exit(app.exec_())

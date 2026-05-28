@@ -2,7 +2,14 @@ import sqlite3
 import os
 import time
 
-DB_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)), "history.db")
+APP_NAME = "MiMoMonitor"
+if os.name == 'nt':  # Windows
+    CONFIG_DIR = os.path.join(os.environ.get('APPDATA', os.path.expanduser('~')), APP_NAME)
+else:
+    CONFIG_DIR = os.path.join(os.path.expanduser('~'), '.config', APP_NAME)
+os.makedirs(CONFIG_DIR, exist_ok=True)
+
+DB_PATH = os.path.join(CONFIG_DIR, "history.db")
 
 
 def get_conn():
