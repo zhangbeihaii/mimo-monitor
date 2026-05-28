@@ -386,17 +386,62 @@ class SettingsDialog(QDialog):
         layout.addLayout(btn_layout)
 
     def auto_get_cookies(self):
-        """打开浏览器让用户手动获取 Cookies"""
-        import webbrowser
-        webbrowser.open("https://platform.xiaomimimo.com/console/plan-manage")
-        QMessageBox.information(self, "获取 Cookies",
-            "已打开浏览器，请按以下步骤操作：\n\n"
-            "1. 在浏览器中登录 Mimo 平台\n"
-            "2. 按 F12 打开开发者工具\n"
-            "3. 切换到「Application」标签\n"
-            "4. 左侧找到「Cookies」\n"
-            "5. 复制所有 cookie 值\n"
-            "6. 粘贴到下方输入框")
+        """自动获取 Cookies - 使用 Selenium"""
+        import threading
+
+        def extract():
+            try:
+                from selenium import webdriver
+                from selenium.webdriver.chrome.options import Options
+                from selenium.webdriver.support.ui import WebDriverWait
+                from selenium.webdriver.support import expected_conditions as EC
+
+                # 设置 Chrome 选项
+                options = Options()
+                options.add_argument("--start-maximized")
+                options.add_experimental_option("detach", True)  # 关闭脚本后浏览器保持打开
+
+                # 启动浏览器
+                driver = webdriver.Chrome(options=options)
+                driver.get("https://platform.xiaomimimo.com/console/plan-manage")
+
+                # 提示用户登录
+                QMessageBox.information(self, "自动获取 Cookies",
+                    "浏览器已打开，请在浏览器中登录 Mimo 平台。\n\n"
+                    "登录成功后，点击下方「已登录」按钮。")
+
+                # 等待用户点击已登录
+                reply = QMessageBox.question(self, "确认登录",
+                    "请确认已在浏览器中登录成功。\n\n"
+                    "点击「是」自动提取 Cookies。",
+                    QMessageBox.Yes | QMessageBox.No, QMessageBox.Yes)
+
+                if reply == QMessageBox.Yes:
+                    # 获取所有 cookies
+                    cookies = driver.get_cookies()
+                    cookies_list = []
+                    for cookie in cookies:
+                        # 去除双引号
+                        value = cookie['value'].strip('"')
+                        cookies_list.append(f"{cookie['name']}={value}")
+
+                    cookies_str = "; ".join(cookies_list)
+
+                    if cookies_str:
+                        self.mimo_input.setText(cookies_str)
+                        QMessageBox.information(self, "成功",
+                            "Cookies 已自动获取！\n\n"
+                            "点击「保存」完成配置。")
+                    else:
+                        QMessageBox.warning(self, "失败", "未获取到 Cookies，请重试。")
+
+                    # 关闭浏览器
+                    driver.quit()
+
+            except Exception as e:
+                QMessageBox.critical(self, "错误", f"获取失败：{str(e)}")
+
+        threading.Thread(target=extract, daemon=True).start()
 
     def save(self):
         self.config["mimo_cookies"] = self.mimo_input.text().strip()
