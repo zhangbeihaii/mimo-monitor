@@ -42,79 +42,90 @@ REFRESH_INTERVAL_MS = 5 * 60 * 1000
 
 CARD_STYLE = """
 QFrame#card {
-    background: white;
-    border: 1px solid #E5E5E5;
-    border-radius: 12px;
+    background: rgba(255, 255, 255, 0.7);
+    border: 1px solid rgba(255, 255, 255, 0.8);
+    border-radius: 16px;
 }
 """
 
 GLOBAL_STYLE = """
 QMainWindow {
-    background: #F5F5F7;
+    background: qlineargradient(x1:0, y1:0, x2:1, y2:1,
+        stop:0 #667eea, stop:1 #764ba2);
 }
 QLabel {
     font-family: "Microsoft YaHei", "Segoe UI", sans-serif;
 }
 QPushButton {
     font-family: "Microsoft YaHei", "Segoe UI", sans-serif;
-    background: #FFFFFF;
-    border: 1px solid #D1D1D6;
-    border-radius: 8px;
-    padding: 8px 20px;
+    background: rgba(255, 255, 255, 0.9);
+    border: 1px solid rgba(255, 255, 255, 0.5);
+    border-radius: 12px;
+    padding: 10px 24px;
     font-size: 13px;
     color: #333;
 }
 QPushButton:hover {
-    background: #F0F0F0;
+    background: rgba(255, 255, 255, 1);
+    border: 1px solid rgba(255, 255, 255, 0.8);
 }
 QPushButton:pressed {
-    background: #E5E5EA;
+    background: rgba(240, 240, 245, 0.9);
 }
 QPushButton#primary {
-    background: #007AFF;
+    background: qlineargradient(x1:0, y1:0, x2:1, y2:0,
+        stop:0 #667eea, stop:1 #764ba2);
     color: white;
     border: none;
+    font-weight: bold;
 }
 QPushButton#primary:hover {
-    background: #0056CC;
+    background: qlineargradient(x1:0, y1:0, x2:1, y2:0,
+        stop:0 #5a6fd6, stop:1 #6a4190);
 }
 QPushButton#refresh {
-    background: #34C759;
+    background: qlineargradient(x1:0, y1:0, x2:1, y2:0,
+        stop:0 #11998e, stop:1 #38ef7d);
     color: white;
     border: none;
     font-weight: bold;
 }
 QPushButton#refresh:hover {
-    background: #2DA44E;
+    background: qlineargradient(x1:0, y1:0, x2:1, y2:0,
+        stop:0 #0e8a7f, stop:1 #32d970);
 }
 QPushButton#refresh:disabled {
-    background: #A8DAB5;
+    background: rgba(150, 220, 180, 0.6);
 }
 QProgressBar {
     border: none;
-    border-radius: 6px;
-    background: #E8E8ED;
-    height: 12px;
+    border-radius: 8px;
+    background: rgba(255, 255, 255, 0.3);
+    height: 14px;
     text-align: center;
     font-size: 10px;
-    color: #666;
+    color: white;
 }
 QProgressBar::chunk {
-    border-radius: 6px;
+    border-radius: 8px;
+    background: qlineargradient(x1:0, y1:0, x2:1, y2:0,
+        stop:0 #667eea, stop:1 #764ba2);
 }
 QDialog {
-    background: #F5F5F7;
+    background: qlineargradient(x1:0, y1:0, x2:1, y2:1,
+        stop:0 #667eea, stop:1 #764ba2);
     font-family: "Microsoft YaHei", "Segoe UI", sans-serif;
 }
 QLineEdit {
-    border: 1px solid #D1D1D6;
-    border-radius: 8px;
-    padding: 8px 12px;
+    border: 1px solid rgba(255, 255, 255, 0.4);
+    border-radius: 12px;
+    padding: 10px 16px;
     font-size: 13px;
-    background: white;
+    background: rgba(255, 255, 255, 0.8);
 }
 QLineEdit:focus {
-    border: 2px solid #007AFF;
+    border: 2px solid rgba(255, 255, 255, 0.8);
+    background: rgba(255, 255, 255, 0.95);
 }
 """
 
@@ -155,9 +166,9 @@ def _fmt_short(n) -> str:
 
 def make_shadow():
     shadow = QGraphicsDropShadowEffect()
-    shadow.setBlurRadius(20)
-    shadow.setOffset(0, 2)
-    shadow.setColor(QColor(0, 0, 0, 30))
+    shadow.setBlurRadius(30)
+    shadow.setOffset(0, 4)
+    shadow.setColor(QColor(102, 126, 234, 50))
     return shadow
 
 
@@ -169,11 +180,11 @@ def make_card() -> QFrame:
     return card
 
 
-def make_info_row(label_text: str, color: str = "#333") -> tuple:
+def make_info_row(label_text: str, color: str = "#666") -> tuple:
     """创建一行：标签 + 数值"""
     row = QHBoxLayout()
     lbl = QLabel(label_text)
-    lbl.setStyleSheet(f"font-size: 13px; color: #888;")
+    lbl.setStyleSheet(f"font-size: 13px; color: rgba(0, 0, 0, 0.5);")
     val = QLabel("--")
     val.setStyleSheet(f"font-size: 13px; font-weight: bold; color: {color};")
     val.setAlignment(Qt.AlignRight | Qt.AlignVCenter)
@@ -203,7 +214,7 @@ def make_section_bar(title: str, color: str) -> tuple:
     layout.addWidget(big)
 
     sub = QLabel("")
-    sub.setStyleSheet("font-size: 12px; color: #888;")
+    sub.setStyleSheet("font-size: 12px; color: rgba(0, 0, 0, 0.5);")
     sub.setAlignment(Qt.AlignCenter)
     layout.addWidget(sub)
 
@@ -213,7 +224,7 @@ def make_section_bar(title: str, color: str) -> tuple:
     bar.setTextVisible(False)
     bar.setFixedHeight(8)
     bar.setStyleSheet(f"""
-        QProgressBar {{ background: #E8E8ED; border-radius: 4px; }}
+        QProgressBar {{ background: rgba(0, 0, 0, 0.1); border-radius: 4px; }}
         QProgressBar::chunk {{ background: {color}; border-radius: 4px; }}
     """)
     layout.addWidget(bar)
@@ -429,7 +440,7 @@ class MimoDetail(QWidget):
         delta_layout.setContentsMargins(16, 12, 16, 12)
 
         delta_plan_lbl = QLabel("套餐本次新增:")
-        delta_plan_lbl.setStyleSheet("font-size: 12px; color: #888;")
+        delta_plan_lbl.setStyleSheet("font-size: 12px; color: rgba(0, 0, 0, 0.5);")
         delta_layout.addWidget(delta_plan_lbl)
         self.delta_plan_val = QLabel("--")
         self.delta_plan_val.setStyleSheet("font-size: 14px; font-weight: bold; color: #FF9500;")
@@ -438,7 +449,7 @@ class MimoDetail(QWidget):
         delta_layout.addStretch()
 
         delta_comp_lbl = QLabel("补偿本次新增:")
-        delta_comp_lbl.setStyleSheet("font-size: 12px; color: #888;")
+        delta_comp_lbl.setStyleSheet("font-size: 12px; color: rgba(0, 0, 0, 0.5);")
         delta_layout.addWidget(delta_comp_lbl)
         self.delta_comp_val = QLabel("--")
         self.delta_comp_val.setStyleSheet("font-size: 14px; font-weight: bold; color: #5856D6;")
@@ -465,13 +476,13 @@ class MimoDetail(QWidget):
         info_layout.setContentsMargins(16, 10, 16, 10)
 
         self.plan_name_lbl = QLabel("套餐: --")
-        self.plan_name_lbl.setStyleSheet("font-size: 12px; color: #555;")
+        self.plan_name_lbl.setStyleSheet("font-size: 12px; color: rgba(0, 0, 0, 0.6);")
         info_layout.addWidget(self.plan_name_lbl)
 
         info_layout.addStretch()
 
         self.expire_lbl = QLabel("有效期: --")
-        self.expire_lbl.setStyleSheet("font-size: 12px; color: #555;")
+        self.expire_lbl.setStyleSheet("font-size: 12px; color: rgba(0, 0, 0, 0.6);")
         info_layout.addWidget(self.expire_lbl)
 
         layout.addWidget(info_card)
@@ -490,7 +501,7 @@ class MimoDetail(QWidget):
         if "error" in data:
             self.plan_big.setText("--")
             self.plan_sub.setText(data["error"])
-            self.plan_sub.setStyleSheet("font-size: 12px; color: #FF3B30;")
+            self.plan_sub.setStyleSheet("font-size: 12px; color: #ff6b6b;")
             self.plan_bar.setValue(0)
             self.comp_big.setText("--")
             self.comp_bar.setValue(0)
@@ -511,15 +522,15 @@ class MimoDetail(QWidget):
             delta_plan = plan_used - self.last_plan_used
             if delta_plan >= 0:
                 self.delta_plan_val.setText(f"+{delta_plan:,}")
-                self.delta_plan_val.setStyleSheet("font-size: 14px; font-weight: bold; color: #FF3B30;")
+                self.delta_plan_val.setStyleSheet("font-size: 14px; font-weight: bold; color: #ff6b6b;")
             else:
                 self.delta_plan_val.setText(f"{delta_plan:,}")
-                self.delta_plan_val.setStyleSheet("font-size: 14px; font-weight: bold; color: #34C759;")
+                self.delta_plan_val.setStyleSheet("font-size: 14px; font-weight: bold; color: #51cf66;")
         self.last_plan_used = plan_used
 
         self.plan_big.setText(f"{plan_remain:,}")
         self.plan_sub.setText(f"套餐剩余  (已用 {plan_pct_display}%)")
-        self.plan_sub.setStyleSheet("font-size: 12px; color: #888;")
+        self.plan_sub.setStyleSheet("font-size: 12px; color: rgba(0, 0, 0, 0.5);")
         self.plan_bar.setValue(int((1 - plan_pct_used) * 100) if plan_limit > 0 else 0)
         self.plan_used.setText(f"{plan_used:,}")
         self.plan_limit.setText(f"{plan_limit:,}")
@@ -538,15 +549,15 @@ class MimoDetail(QWidget):
             delta_comp = comp_used - self.last_comp_used
             if delta_comp >= 0:
                 self.delta_comp_val.setText(f"+{delta_comp:,}")
-                self.delta_comp_val.setStyleSheet("font-size: 14px; font-weight: bold; color: #FF3B30;")
+                self.delta_comp_val.setStyleSheet("font-size: 14px; font-weight: bold; color: #ff6b6b;")
             else:
                 self.delta_comp_val.setText(f"{delta_comp:,}")
-                self.delta_comp_val.setStyleSheet("font-size: 14px; font-weight: bold; color: #34C759;")
+                self.delta_comp_val.setStyleSheet("font-size: 14px; font-weight: bold; color: #51cf66;")
         self.last_comp_used = comp_used
 
         self.comp_big.setText(f"{comp_remain:,}")
         self.comp_sub.setText(f"补偿剩余  (已用 {comp_pct_display}%)")
-        self.comp_sub.setStyleSheet("font-size: 12px; color: #888;")
+        self.comp_sub.setStyleSheet("font-size: 12px; color: rgba(0, 0, 0, 0.5);")
         self.comp_bar.setValue(int((1 - comp_pct_used) * 100) if comp_limit > 0 else 0)
         self.comp_used.setText(f"{comp_used:,}")
         self.comp_limit.setText(f"{comp_limit:,}")
@@ -578,7 +589,7 @@ class MimoDetail(QWidget):
     def set_unconfigured(self):
         self.plan_big.setText("--")
         self.plan_sub.setText("请在设置中填写 Mimo Cookies")
-        self.plan_sub.setStyleSheet("font-size: 12px; color: #FF9500;")
+        self.plan_sub.setStyleSheet("font-size: 12px; color: #ffd43b;")
         self.plan_bar.setValue(0)
         self.plan_used.setText("--")
         self.plan_limit.setText("--")
@@ -616,16 +627,16 @@ class MainWindow(QMainWindow):
         # 顶部标题栏
         header = QHBoxLayout()
         title = QLabel("MiMo Monitor")
-        title.setStyleSheet("font-size: 22px; font-weight: bold; color: #1D1D1F;")
+        title.setStyleSheet("font-size: 24px; font-weight: bold; color: white;")
         header.addWidget(title)
         header.addStretch()
 
         self.float_btn = QPushButton("悬浮窗")
         self.float_btn.setFixedHeight(30)
         self.float_btn.setStyleSheet("""
-            QPushButton { background: #F0F0F0; border: 1px solid #D1D1D6; border-radius: 6px;
-                          padding: 4px 12px; font-size: 12px; color: #555; }
-            QPushButton:hover { background: #E5E5EA; }
+            QPushButton { background: rgba(255, 255, 255, 0.2); border: 1px solid rgba(255, 255, 255, 0.3);
+                          border-radius: 8px; padding: 6px 16px; font-size: 12px; color: white; }
+            QPushButton:hover { background: rgba(255, 255, 255, 0.3); }
         """)
         self.float_btn.clicked.connect(self.switch_to_float)
         header.addWidget(self.float_btn)
@@ -642,14 +653,14 @@ class MainWindow(QMainWindow):
         # 底部状态栏
         footer = QHBoxLayout()
         self.status_label = QLabel("就绪")
-        self.status_label.setStyleSheet("font-size: 11px; color: #888;")
+        self.status_label.setStyleSheet("font-size: 11px; color: rgba(255, 255, 255, 0.7);")
         footer.addWidget(self.status_label)
 
         footer.addStretch()
 
         # 刷新间隔选择
         self.interval_label = QLabel("自动刷新时间：")
-        self.interval_label.setStyleSheet("font-size: 11px; color: #888;")
+        self.interval_label.setStyleSheet("font-size: 11px; color: rgba(255, 255, 255, 0.7);")
         footer.addWidget(self.interval_label)
 
         self.interval_combo = QComboBox()
@@ -672,14 +683,26 @@ class MainWindow(QMainWindow):
                 self.interval_combo.setCurrentIndex(i)
                 break
         self.interval_combo.setStyleSheet("""
-            QComboBox { border: 1px solid #D1D1D6; border-radius: 6px; padding: 4px 8px; font-size: 11px; }
+            QComboBox {
+                border: 1px solid rgba(255, 255, 255, 0.3);
+                border-radius: 8px;
+                padding: 6px 12px;
+                font-size: 11px;
+                background: rgba(255, 255, 255, 0.2);
+                color: white;
+            }
         """)
         self.interval_combo.currentIndexChanged.connect(self.on_interval_changed)
         footer.addWidget(self.interval_combo)
 
         self.toggle_btn = QPushButton("暂停")
         self.toggle_btn.setFixedWidth(50)
-        self.toggle_btn.setStyleSheet("font-size: 11px; padding: 4px 8px;")
+        self.toggle_btn.setStyleSheet("""
+            font-size: 11px; padding: 6px 12px;
+            background: rgba(255, 255, 255, 0.2);
+            color: white;
+            border: 1px solid rgba(255, 255, 255, 0.3);
+        """)
         self.toggle_btn.clicked.connect(self.toggle_auto)
         footer.addWidget(self.toggle_btn)
 
@@ -805,7 +828,7 @@ class MainWindow(QMainWindow):
         self.refresh_btn.setEnabled(False)
         self.refresh_btn.setText("获取中...")
         self.status_label.setText("正在获取数据...")
-        self.status_label.setStyleSheet("font-size: 11px; color: #888;")
+        self.status_label.setStyleSheet("font-size: 11px; color: rgba(255, 255, 255, 0.7);")
 
         self.worker = FetchWorker(
             self.config.get("mimo_cookies", ""),
@@ -818,7 +841,7 @@ class MainWindow(QMainWindow):
         self.refresh_btn.setText("↻ 刷新")
         now_str = time.strftime("%H:%M:%S")
         self.status_label.setText(f"上次更新: {now_str}")
-        self.status_label.setStyleSheet("font-size: 11px; color: #34C759;")
+        self.status_label.setStyleSheet("font-size: 11px; color: #38ef7d;")
 
         self._last_data = data
         self._update_panels(data)
