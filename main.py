@@ -273,6 +273,93 @@ class FetchWorker(QThread):
         self.finished.emit(result)
 
 
+class AutoCookieWorker(QThread):
+    finished = pyqtSignal(bool, str)
+
+    def run(self):
+        import subprocess
+        import requests
+        import websocket
+
+        DEBUG_PORT = 9222
+        edge_path = None
+        for p in [
+            r"C:\Program Files (x86)\Microsoft\Edge\Application\msedge.exe",
+            r"C:\Program Files\Microsoft\Edge\Application\msedge.exe",
+        ]:
+            if os.path.exists(p):
+                edge_path = p
+                break
+        if not edge_path:
+            self.finished.emit(False, "找不到 Edge 浏览器")
+            return
+
+        user_data = os.path.join(os.environ["LOCALAPPDATA"], "Microsoft", "Edge", "User Data")
+
+        try:
+            # 关闭 Edge
+            subprocess.run(["taskkill", "/F", "/IM", "msedge.exe"], capture_output=True)
+            time.sleep(1)
+
+            # 调试模式启动
+            subprocess.Popen([
+                edge_path,
+                f"--remote-debugging-port={DEBUG_PORT}",
+                f"--user-data-dir={user_data}",
+                "--profile-directory=Default",
+                "--remote-allow-origins=*",
+                "https://platform.xiaomimimo.com/console/plan-manage",
+            ])
+            time.sleep(4)
+
+            # 获取 cookies
+            resp = requests.get(f"http://localhost:{DEBUG_PORT}/json", timeout=5)
+            tabs = resp.json()
+            ws_url = None
+            for tab in tabs:
+                if "mimo" in tab.get("url", "").lower():
+                    ws_url = tab.get("webSocketDebuggerUrl")
+                    break
+            if not ws_url:
+                ws_url = tabs[0].get("webSocketDebuggerUrl") if tabs else None
+            if not ws_url:
+                raise RuntimeError("无法获取调试连接")
+
+            ws = websocket.create_connection(ws_url)
+            ws.send(json.dumps({
+                "id": 1,
+                "method": "Network.getCookies",
+                "params": {"urls": ["https://platform.xiaomimimo.com"]}
+            }))
+            result = json.loads(ws.recv())
+            ws.close()
+
+            cookies = result.get("result", {}).get("cookies", [])
+            mimo_cookies = []
+            for c in cookies:
+                name = c["name"]
+                value = c["value"].strip('"')
+                if "serviceToken" in name:
+                    mimo_cookies.append(f'{name}="{value}"')
+                else:
+                    mimo_cookies.append(f"{name}={value}")
+
+            cookie_str = "; ".join(mimo_cookies)
+            if not cookie_str:
+                raise RuntimeError("未获取到 Cookies，请先在 Edge 中登录 Mimo")
+
+            self.finished.emit(True, cookie_str)
+
+        except Exception as e:
+            self.finished.emit(False, str(e))
+        finally:
+            # 恢复正常 Edge
+            subprocess.run(["taskkill", "/F", "/IM", "msedge.exe"], capture_output=True)
+            time.sleep(1)
+            if edge_path:
+                subprocess.Popen([edge_path, f"--user-data-dir={user_data}", "--profile-directory=Default"])
+
+
 # ---------- 标签页按钮 ----------
 
 class TabButton(QPushButton):
@@ -355,11 +442,21 @@ class SettingsDialog(QDialog):
         """)
         help_btn.clicked.connect(self.show_cookie_tutorial)
         help_btn_layout.addWidget(help_btn)
+
+        self.auto_btn = QPushButton("自动更新 Cookies")
+        self.auto_btn.setStyleSheet("""
+            QPushButton { background: #34C759; color: white; border: none; border-radius: 6px;
+                          padding: 8px 16px; font-size: 13px; }
+            QPushButton:hover { background: #2DB84E; }
+            QPushButton:disabled { background: #A8D5BA; }
+        """)
+        self.auto_btn.clicked.connect(self.auto_update_cookies)
+        help_btn_layout.addWidget(self.auto_btn)
         help_btn_layout.addStretch()
         form.addRow("", help_btn_layout)
 
         hint = QLabel(
-            "点击「查看获取教程」查看详细步骤"
+            "点击「自动更新 Cookies」自动从 Edge 浏览器提取（会短暂关闭 Edge）"
         )
         hint.setStyleSheet("color: #888; font-size: 11px;")
         hint.setWordWrap(True)
@@ -411,6 +508,32 @@ class SettingsDialog(QDialog):
             "7. 点击该请求，查看「Headers」\n\n"
             "8. 找到「Cookie」字段，复制其值\n\n"
             "9. 粘贴到下方输入框（会自动去除双引号）")
+
+    def auto_update_cookies(self):
+        """自动从 Edge 提取 Cookies"""
+        reply = QMessageBox.question(
+            self, "自动更新",
+            "将短暂关闭 Edge 浏览器以提取 Cookies，是否继续？",
+            QMessageBox.Yes | QMessageBox.No
+        )
+        if reply != QMessageBox.Yes:
+            return
+
+        self.auto_btn.setEnabled(False)
+        self.auto_btn.setText("更新中...")
+
+        worker = AutoCookieWorker()
+        worker.finished.connect(self._on_auto_cookie_done)
+        worker.start()
+
+    def _on_auto_cookie_done(self, success: bool, result: str):
+        self.auto_btn.setEnabled(True)
+        self.auto_btn.setText("自动更新 Cookies")
+        if success:
+            self.mimo_input.setText(result)
+            QMessageBox.information(self, "成功", "Cookies 已自动更新！")
+        else:
+            QMessageBox.warning(self, "失败", f"自动更新失败：{result}")
 
     def save(self):
         self.config["mimo_cookies"] = self.mimo_input.text().strip()
