@@ -26,3 +26,13 @@ Thumbs.db
 
 # Claude
 .claude/
+
+# Edge temp data
+.edge_temp/
+
+# PyInstaller
+build/
+dist/
+*.spec
+create_icon.py
+build.py
