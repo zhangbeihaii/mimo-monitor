@@ -567,20 +567,24 @@ class MimoDetail(QWidget):
         delta_layout = QHBoxLayout(delta_card)
         delta_layout.setContentsMargins(16, 12, 16, 12)
 
+        t = get_theme()
+        tc = t["text_in_card"]
+        tc2 = t["text_in_card_secondary"]
+
         delta_plan_lbl = QLabel("套餐本次新增:")
-        delta_plan_lbl.setStyleSheet("font-size: 12px; color: rgba(0, 0, 0, 0.5);")
+        delta_plan_lbl.setStyleSheet(f"font-size: 12px; color: {tc2};")
         delta_layout.addWidget(delta_plan_lbl)
         self.delta_plan_val = QLabel("--")
-        self.delta_plan_val.setStyleSheet("font-size: 14px; font-weight: bold; color: #FF9500;")
+        self.delta_plan_val.setStyleSheet(f"font-size: 14px; font-weight: bold; color: {t['plan_color']};")
         delta_layout.addWidget(self.delta_plan_val)
 
         delta_layout.addStretch()
 
         delta_comp_lbl = QLabel("补偿本次新增:")
-        delta_comp_lbl.setStyleSheet("font-size: 12px; color: rgba(0, 0, 0, 0.5);")
+        delta_comp_lbl.setStyleSheet(f"font-size: 12px; color: {tc2};")
         delta_layout.addWidget(delta_comp_lbl)
         self.delta_comp_val = QLabel("--")
-        self.delta_comp_val.setStyleSheet("font-size: 14px; font-weight: bold; color: #5856D6;")
+        self.delta_comp_val.setStyleSheet(f"font-size: 14px; font-weight: bold; color: {t['comp_color']};")
         delta_layout.addWidget(self.delta_comp_val)
 
         layout.addWidget(delta_card)
@@ -604,13 +608,13 @@ class MimoDetail(QWidget):
         info_layout.setContentsMargins(16, 10, 16, 10)
 
         self.plan_name_lbl = QLabel("套餐: --")
-        self.plan_name_lbl.setStyleSheet("font-size: 12px; color: rgba(0, 0, 0, 0.6);")
+        self.plan_name_lbl.setStyleSheet(f"font-size: 12px; color: {tc};")
         info_layout.addWidget(self.plan_name_lbl)
 
         info_layout.addStretch()
 
         self.expire_lbl = QLabel("有效期: --")
-        self.expire_lbl.setStyleSheet("font-size: 12px; color: rgba(0, 0, 0, 0.6);")
+        self.expire_lbl.setStyleSheet(f"font-size: 12px; color: {tc};")
         info_layout.addWidget(self.expire_lbl)
 
         layout.addWidget(info_card)
@@ -627,10 +631,14 @@ class MimoDetail(QWidget):
         layout.addStretch()
 
     def update_data(self, data: dict, history: list = None, detail: dict = None):
+        t = get_theme()
+        tc = t["text_in_card"]
+        tc2 = t["text_in_card_secondary"]
+
         if "error" in data:
             self.plan_big.setText("--")
             self.plan_sub.setText(data["error"])
-            self.plan_sub.setStyleSheet("font-size: 12px; color: #ff6b6b;")
+            self.plan_sub.setStyleSheet(f"font-size: 12px; color: {t['status_err']};")
             self.plan_bar.setValue(0)
             self.comp_big.setText("--")
             self.comp_bar.setValue(0)
@@ -651,15 +659,15 @@ class MimoDetail(QWidget):
             delta_plan = plan_used - self.last_plan_used
             if delta_plan >= 0:
                 self.delta_plan_val.setText(f"+{delta_plan:,}")
-                self.delta_plan_val.setStyleSheet("font-size: 14px; font-weight: bold; color: #ff6b6b;")
+                self.delta_plan_val.setStyleSheet(f"font-size: 14px; font-weight: bold; color: {t['delta_inc']};")
             else:
                 self.delta_plan_val.setText(f"{delta_plan:,}")
-                self.delta_plan_val.setStyleSheet("font-size: 14px; font-weight: bold; color: #51cf66;")
+                self.delta_plan_val.setStyleSheet(f"font-size: 14px; font-weight: bold; color: {t['delta_dec']};")
         self.last_plan_used = plan_used
 
         self.plan_big.setText(f"{plan_remain:,}")
         self.plan_sub.setText(f"套餐剩余  (已用 {plan_pct_display}%)")
-        self.plan_sub.setStyleSheet("font-size: 12px; color: rgba(0, 0, 0, 0.5);")
+        self.plan_sub.setStyleSheet(f"font-size: 12px; color: {tc2};")
         self.plan_bar.setValue(int((1 - plan_pct_used) * 100) if plan_limit > 0 else 0)
         self.plan_used.setText(f"{plan_used:,}")
         self.plan_limit.setText(f"{plan_limit:,}")
@@ -678,15 +686,15 @@ class MimoDetail(QWidget):
             delta_comp = comp_used - self.last_comp_used
             if delta_comp >= 0:
                 self.delta_comp_val.setText(f"+{delta_comp:,}")
-                self.delta_comp_val.setStyleSheet("font-size: 14px; font-weight: bold; color: #ff6b6b;")
+                self.delta_comp_val.setStyleSheet(f"font-size: 14px; font-weight: bold; color: {t['delta_inc']};")
             else:
                 self.delta_comp_val.setText(f"{delta_comp:,}")
-                self.delta_comp_val.setStyleSheet("font-size: 14px; font-weight: bold; color: #51cf66;")
+                self.delta_comp_val.setStyleSheet(f"font-size: 14px; font-weight: bold; color: {t['delta_dec']};")
         self.last_comp_used = comp_used
 
         self.comp_big.setText(f"{comp_remain:,}")
         self.comp_sub.setText(f"补偿剩余  (已用 {comp_pct_display}%)")
-        self.comp_sub.setStyleSheet("font-size: 12px; color: rgba(0, 0, 0, 0.5);")
+        self.comp_sub.setStyleSheet(f"font-size: 12px; color: {tc2};")
         self.comp_bar.setValue(int((1 - comp_pct_used) * 100) if comp_limit > 0 else 0)
         self.comp_used.setText(f"{comp_used:,}")
         self.comp_limit.setText(f"{comp_limit:,}")
@@ -710,7 +718,7 @@ class MimoDetail(QWidget):
             if end:
                 self.expire_lbl.setText(f"有效期至: {end[:10]}")
                 expired = detail.get("expired", False)
-                self.expire_lbl.setStyleSheet(f"font-size: 12px; color: {'#FF3B30' if expired else '#555'};")
+                self.expire_lbl.setStyleSheet(f"font-size: 12px; color: {t['status_err'] if expired else tc};")
         else:
             self.plan_name_lbl.setText("套餐: --")
             self.expire_lbl.setText("有效期: --")
