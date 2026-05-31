@@ -529,9 +529,9 @@ class SettingsDialog(QDialog):
         self.auto_btn.setEnabled(False)
         self.auto_btn.setText("更新中...")
 
-        worker = AutoCookieWorker()
-        worker.finished.connect(self._on_auto_cookie_done)
-        worker.start()
+        self._cookie_worker = AutoCookieWorker()
+        self._cookie_worker.finished.connect(self._on_auto_cookie_done)
+        self._cookie_worker.start()
 
     def _on_auto_cookie_done(self, success: bool, result: str):
         self.auto_btn.setEnabled(True)
