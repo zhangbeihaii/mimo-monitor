@@ -53,6 +53,9 @@ THEMES = {
                 border-radius: 16px;
             }
         """,
+        "text_in_card": "rgba(0, 0, 0, 0.6)",
+        "text_in_card_secondary": "rgba(0, 0, 0, 0.45)",
+        "big_number": "#1D1D1F",
         "global": """
             QMainWindow {
                 background: qlineargradient(x1:0, y1:0, x2:1, y2:1,
@@ -114,7 +117,6 @@ THEMES = {
         "comp_color": "#5856D6",
         "delta_inc": "#ff6b6b",
         "delta_dec": "#69db7c",
-        "big_number": "white",
     },
     "white": {
         "name": "白色",
@@ -125,6 +127,9 @@ THEMES = {
                 border-radius: 12px;
             }
         """,
+        "text_in_card": "#333",
+        "text_in_card_secondary": "#888",
+        "big_number": "#1D1D1F",
         "global": """
             QMainWindow { background: #F5F5F7; }
             QLabel { font-family: "Microsoft YaHei", "Segoe UI", sans-serif; }
@@ -171,7 +176,6 @@ THEMES = {
         "comp_color": "#5856D6",
         "delta_inc": "#FF3B30",
         "delta_dec": "#34C759",
-        "big_number": "#1D1D1F",
     },
 }
 
@@ -729,6 +733,8 @@ class MimoDetail(QWidget):
     def apply_theme(self):
         t = get_theme()
         card_style = t["card"]
+        tc = t["text_in_card"]
+        tc2 = t["text_in_card_secondary"]
         # 更新所有卡片样式
         for card in self.findChildren(QFrame):
             if card.objectName() == "card":
@@ -736,10 +742,10 @@ class MimoDetail(QWidget):
         # 更新文字颜色
         self.plan_big.setStyleSheet(f"font-size: 32px; font-weight: bold; color: {t['big_number']};")
         self.comp_big.setStyleSheet(f"font-size: 32px; font-weight: bold; color: {t['big_number']};")
-        self.plan_sub.setStyleSheet(f"font-size: 12px; color: {t['text_secondary']};")
-        self.comp_sub.setStyleSheet(f"font-size: 12px; color: {t['text_secondary']};")
-        self.plan_name_lbl.setStyleSheet(f"font-size: 12px; color: {t['text_secondary']};")
-        self.expire_lbl.setStyleSheet(f"font-size: 12px; color: {t['text_secondary']};")
+        self.plan_sub.setStyleSheet(f"font-size: 12px; color: {tc2};")
+        self.comp_sub.setStyleSheet(f"font-size: 12px; color: {tc2};")
+        self.plan_name_lbl.setStyleSheet(f"font-size: 12px; color: {tc};")
+        self.expire_lbl.setStyleSheet(f"font-size: 12px; color: {tc};")
         self.delta_plan_val.setStyleSheet(f"font-size: 14px; font-weight: bold; color: {t['plan_color']};")
         self.delta_comp_val.setStyleSheet(f"font-size: 14px; font-weight: bold; color: {t['comp_color']};")
 
