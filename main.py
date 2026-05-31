@@ -558,7 +558,7 @@ class MimoDetail(QWidget):
         # 本次新增卡片
         delta_card = QFrame()
         delta_card.setObjectName("card")
-        delta_card.setStyleSheet(CARD_STYLE)
+        delta_card.setStyleSheet(get_theme()["card"])
         delta_card.setGraphicsEffect(make_shadow())
         delta_layout = QHBoxLayout(delta_card)
         delta_layout.setContentsMargins(16, 12, 16, 12)
@@ -594,7 +594,7 @@ class MimoDetail(QWidget):
         # 套餐信息行
         info_card = QFrame()
         info_card.setObjectName("card")
-        info_card.setStyleSheet(CARD_STYLE)
+        info_card.setStyleSheet(get_theme()["card"])
         info_card.setGraphicsEffect(make_shadow())
         info_layout = QHBoxLayout(info_card)
         info_layout.setContentsMargins(16, 10, 16, 10)
@@ -712,9 +712,10 @@ class MimoDetail(QWidget):
             self.expire_lbl.setText("有效期: --")
 
     def set_unconfigured(self):
+        t = get_theme()
         self.plan_big.setText("--")
         self.plan_sub.setText("请在设置中填写 Mimo Cookies")
-        self.plan_sub.setStyleSheet("font-size: 12px; color: #ffd43b;")
+        self.plan_sub.setStyleSheet(f"font-size: 12px; color: {t['status_warn']};")
         self.plan_bar.setValue(0)
         self.plan_used.setText("--")
         self.plan_limit.setText("--")
@@ -724,6 +725,23 @@ class MimoDetail(QWidget):
         self.comp_used.setText("--")
         self.comp_limit.setText("--")
         self.comp_remain.setText("--")
+
+    def apply_theme(self):
+        t = get_theme()
+        card_style = t["card"]
+        # 更新所有卡片样式
+        for card in self.findChildren(QFrame):
+            if card.objectName() == "card":
+                card.setStyleSheet(card_style)
+        # 更新文字颜色
+        self.plan_big.setStyleSheet(f"font-size: 32px; font-weight: bold; color: {t['big_number']};")
+        self.comp_big.setStyleSheet(f"font-size: 32px; font-weight: bold; color: {t['big_number']};")
+        self.plan_sub.setStyleSheet(f"font-size: 12px; color: {t['text_secondary']};")
+        self.comp_sub.setStyleSheet(f"font-size: 12px; color: {t['text_secondary']};")
+        self.plan_name_lbl.setStyleSheet(f"font-size: 12px; color: {t['text_secondary']};")
+        self.expire_lbl.setStyleSheet(f"font-size: 12px; color: {t['text_secondary']};")
+        self.delta_plan_val.setStyleSheet(f"font-size: 14px; font-weight: bold; color: {t['plan_color']};")
+        self.delta_comp_val.setStyleSheet(f"font-size: 14px; font-weight: bold; color: {t['comp_color']};")
 
 
 # ---------- 主窗口 ----------
@@ -868,9 +886,8 @@ class MainWindow(QMainWindow):
         self.toggle_btn.setStyleSheet(t["footer_btn"])
         self.float_btn.setStyleSheet(t["header_btn"])
         self._update_theme_btn()
-        # 刷新详情面板
-        if self._last_data:
-            self._update_panels(self._last_data)
+        # 更新详情面板
+        self.mimo_detail.apply_theme()
 
     def setup_tray(self):
         self.tray = QSystemTrayIcon(self)
