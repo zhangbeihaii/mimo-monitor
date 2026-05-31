@@ -89,7 +89,10 @@ def get_cookies_via_cdp() -> str:
 
 def update_config(cookies: str):
     """更新 config.json"""
-    config_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "config.json")
+    if os.name == 'nt':
+        config_path = os.path.join(os.environ.get('APPDATA', os.path.expanduser('~')), "MiMoMonitor", "config.json")
+    else:
+        config_path = os.path.join(os.path.expanduser('~'), '.config', "MiMoMonitor", "config.json")
     with open(config_path, "r", encoding="utf-8") as f:
         config = json.load(f)
     config["mimo_cookies"] = cookies

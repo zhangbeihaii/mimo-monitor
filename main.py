@@ -613,6 +613,7 @@ class MimoDetail(QWidget):
         # 图表
         self.chart = TrendChart()
         chart_card = make_card()
+        chart_card.setMaximumHeight(200)
         chart_layout = QVBoxLayout(chart_card)
         chart_layout.setContentsMargins(8, 8, 8, 8)
         chart_layout.addWidget(self.chart)
@@ -898,6 +899,8 @@ class MainWindow(QMainWindow):
 
     def show_and_raise(self):
         self.showNormal()
+        self.setMinimumSize(580, 680)
+        self.resize(580, 680)
         self.activateWindow()
         self.raise_()
 
