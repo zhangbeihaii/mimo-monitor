@@ -951,16 +951,21 @@ class MainWindow(QMainWindow):
             self.show_and_raise()
 
     def show_and_raise(self):
-        self.setWindowState(Qt.WindowNoState)
         self.showNormal()
         self.setMinimumSize(580, 680)
-        self.resize(580, 700)
+        # 恢复保存的几何信息
+        if hasattr(self, '_saved_geometry') and self._saved_geometry:
+            self.setGeometry(self._saved_geometry)
+        else:
+            self.resize(580, 700)
         self.activateWindow()
         self.raise_()
 
     def switch_to_float(self):
-        self.setWindowState(Qt.WindowMinimized)
-        self.float_win.move(self.x(), self.y())
+        # 保存窗口几何信息
+        self._saved_geometry = self.geometry()
+        self.hide()
+        self.float_win.move(self._saved_geometry.x(), self._saved_geometry.y())
         self.float_win.show()
         if self._last_data:
             self.float_win.update_data(self._last_data)
