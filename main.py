@@ -128,6 +128,26 @@ QLineEdit:focus {
     border: 2px solid rgba(255, 255, 255, 0.8);
     background: rgba(255, 255, 255, 0.95);
 }
+QComboBox {
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    border-radius: 8px;
+    padding: 6px 12px;
+    font-size: 11px;
+    background: rgba(255, 255, 255, 0.2);
+    color: white;
+}
+QComboBox::drop-down {
+    border: none;
+    width: 20px;
+}
+QComboBox QAbstractItemView {
+    background: #2D2D3F;
+    color: white;
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    selection-background-color: #667eea;
+    selection-color: white;
+    outline: none;
+}
 """
 
 
