@@ -277,9 +277,12 @@ class AutoCookieWorker(QThread):
     finished = pyqtSignal(bool, str)
 
     def run(self):
-        import subprocess
-        import requests
-        import websocket
+        try:
+            import requests
+            import websocket
+        except ImportError as e:
+            self.finished.emit(False, f"缺少依赖: {e}")
+            return
 
         DEBUG_PORT = 9222
         edge_path = None
@@ -297,12 +300,12 @@ class AutoCookieWorker(QThread):
         user_data = os.path.join(os.environ["LOCALAPPDATA"], "Microsoft", "Edge", "User Data")
 
         try:
-            # 关闭 Edge
-            subprocess.run(["taskkill", "/F", "/IM", "msedge.exe"], capture_output=True)
-            time.sleep(1)
+            # 关闭 Edge（不用 /F 避免杀其他进程）
+            subprocess.run(["taskkill", "/IM", "msedge.exe"], capture_output=True)
+            time.sleep(2)
 
             # 调试模式启动
-            subprocess.Popen([
+            proc = subprocess.Popen([
                 edge_path,
                 f"--remote-debugging-port={DEBUG_PORT}",
                 f"--user-data-dir={user_data}",
@@ -310,10 +313,10 @@ class AutoCookieWorker(QThread):
                 "--remote-allow-origins=*",
                 "https://platform.xiaomimimo.com/console/plan-manage",
             ])
-            time.sleep(4)
+            time.sleep(5)
 
             # 获取 cookies
-            resp = requests.get(f"http://localhost:{DEBUG_PORT}/json", timeout=5)
+            resp = requests.get(f"http://localhost:{DEBUG_PORT}/json", timeout=10)
             tabs = resp.json()
             ws_url = None
             for tab in tabs:
@@ -325,7 +328,7 @@ class AutoCookieWorker(QThread):
             if not ws_url:
                 raise RuntimeError("无法获取调试连接")
 
-            ws = websocket.create_connection(ws_url)
+            ws = websocket.create_connection(ws_url, timeout=10)
             ws.send(json.dumps({
                 "id": 1,
                 "method": "Network.getCookies",
@@ -353,11 +356,8 @@ class AutoCookieWorker(QThread):
         except Exception as e:
             self.finished.emit(False, str(e))
         finally:
-            # 恢复正常 Edge
-            subprocess.run(["taskkill", "/F", "/IM", "msedge.exe"], capture_output=True)
-            time.sleep(1)
-            if edge_path:
-                subprocess.Popen([edge_path, f"--user-data-dir={user_data}", "--profile-directory=Default"])
+            # 不恢复 Edge，让用户自己打开
+            pass
 
 
 # ---------- 标签页按钮 ----------
