@@ -113,18 +113,3 @@ if __name__ == "__main__":
             print("未获取到 cookies，请先在 Edge 中登录 Mimo")
     except Exception as e:
         print(f"失败: {e}")
-    finally:
-        # 恢复正常 Edge
-        kill_edge()
-        time.sleep(1)
-        edge_path = None
-        for p in [
-            r"C:\Program Files (x86)\Microsoft\Edge\Application\msedge.exe",
-            r"C:\Program Files\Microsoft\Edge\Application\msedge.exe",
-        ]:
-            if os.path.exists(p):
-                edge_path = p
-                break
-        if edge_path:
-            user_data = os.path.join(os.environ["LOCALAPPDATA"], "Microsoft", "Edge", "User Data")
-            subprocess.Popen([edge_path, f"--user-data-dir={user_data}", "--profile-directory=Default"])
