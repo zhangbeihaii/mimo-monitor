@@ -36,3 +36,4 @@ dist/
 *.spec
 create_icon.py
 build.py
+screenshot*.png
