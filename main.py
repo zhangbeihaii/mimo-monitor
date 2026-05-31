@@ -311,8 +311,9 @@ class AutoCookieWorker(QThread):
                 pass
 
             if not already_debug:
-                # 用 os.system 关闭 Edge
-                os.system("taskkill /IM msedge.exe >nul 2>&1")
+                # 关闭 Edge
+                subprocess.run(["taskkill", "/IM", "msedge.exe"],
+                             capture_output=True, timeout=5)
                 time.sleep(2)
 
                 # 调试模式启动
@@ -324,7 +325,16 @@ class AutoCookieWorker(QThread):
                     "--remote-allow-origins=*",
                     "https://platform.xiaomimimo.com/console/plan-manage",
                 ])
-                time.sleep(5)
+
+                # 等待调试端口就绪
+                for _ in range(15):
+                    time.sleep(1)
+                    try:
+                        r = requests.get(f"http://localhost:{DEBUG_PORT}/json", timeout=1)
+                        if r.status_code == 200:
+                            break
+                    except:
+                        pass
 
             # 获取 cookies
             resp = requests.get(f"http://localhost:{DEBUG_PORT}/json", timeout=10)
