@@ -241,11 +241,12 @@ def make_card() -> QFrame:
 def make_info_row(label_text: str, color: str = None) -> tuple:
     """创建一行：标签 + 数值"""
     t = get_theme()
+    tc2 = t["text_in_card_secondary"]
     if color is None:
-        color = t["text_secondary"]
+        color = tc2
     row = QHBoxLayout()
     lbl = QLabel(label_text)
-    lbl.setStyleSheet(f"font-size: 13px; color: {t['text_secondary']};")
+    lbl.setStyleSheet(f"font-size: 13px; color: {tc2};")
     val = QLabel("--")
     val.setStyleSheet(f"font-size: 13px; font-weight: bold; color: {color};")
     val.setAlignment(Qt.AlignRight | Qt.AlignVCenter)
@@ -276,7 +277,7 @@ def make_section_bar(title: str, color: str) -> tuple:
     layout.addWidget(big)
 
     sub = QLabel("")
-    sub.setStyleSheet(f"font-size: 12px; color: {t['text_secondary']};")
+    sub.setStyleSheet(f"font-size: 12px; color: {t['text_in_card_secondary']};")
     sub.setAlignment(Qt.AlignCenter)
     layout.addWidget(sub)
 
