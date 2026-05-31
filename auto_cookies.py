@@ -1,6 +1,6 @@
 """
-自动从 Edge 提取 Mimo Cookies (远程调试协议方案)
-需要先关闭 Edge，再以调试模式重启
+自动从浏览器提取 Mimo Cookies (远程调试协议方案)
+支持 Edge 和 Chrome
 """
 import os
 import json
@@ -12,31 +12,50 @@ from datetime import datetime
 
 DEBUG_PORT = 9222
 
+# 浏览器配置
+BROWSERS = [
+    {
+        "name": "Edge",
+        "process": "msedge.exe",
+        "paths": [
+            r"C:\Program Files (x86)\Microsoft\Edge\Application\msedge.exe",
+            r"C:\Program Files\Microsoft\Edge\Application\msedge.exe",
+        ],
+        "user_data": os.path.join(os.environ.get("LOCALAPPDATA", ""), "Microsoft", "Edge", "User Data"),
+    },
+    {
+        "name": "Chrome",
+        "process": "chrome.exe",
+        "paths": [
+            r"C:\Program Files\Google\Chrome\Application\chrome.exe",
+            r"C:\Program Files (x86)\Google\Chrome\Application\chrome.exe",
+        ],
+        "user_data": os.path.join(os.environ.get("LOCALAPPDATA", ""), "Google", "Chrome", "User Data"),
+    },
+]
 
-def kill_edge():
-    """关闭 Edge"""
-    subprocess.run(["taskkill", "/F", "/IM", "msedge.exe"], capture_output=True)
+
+def find_browser():
+    """找到可用的浏览器"""
+    for browser in BROWSERS:
+        for path in browser["paths"]:
+            if os.path.exists(path):
+                return browser, path
+    return None, None
+
+
+def kill_browser(process_name):
+    """关闭浏览器"""
+    subprocess.run(["taskkill", "/F", "/IM", process_name], capture_output=True)
     time.sleep(1)
 
 
-def start_edge_debug():
-    """以调试模式启动 Edge"""
-    edge_path = None
-    for p in [
-        r"C:\Program Files (x86)\Microsoft\Edge\Application\msedge.exe",
-        r"C:\Program Files\Microsoft\Edge\Application\msedge.exe",
-    ]:
-        if os.path.exists(p):
-            edge_path = p
-            break
-    if not edge_path:
-        raise FileNotFoundError("找不到 Edge")
-
-    user_data = os.path.join(os.environ["LOCALAPPDATA"], "Microsoft", "Edge", "User Data")
+def start_browser_debug(browser, browser_path):
+    """以调试模式启动浏览器"""
     subprocess.Popen([
-        edge_path,
+        browser_path,
         f"--remote-debugging-port={DEBUG_PORT}",
-        f"--user-data-dir={user_data}",
+        f"--user-data-dir={browser['user_data']}",
         "--profile-directory=Default",
         "--remote-allow-origins=*",
         "https://platform.xiaomimimo.com/console/plan-manage",
@@ -102,16 +121,22 @@ def update_config(cookies: str):
 
 
 if __name__ == "__main__":
+    browser, browser_path = find_browser()
+    if not browser:
+        print("未找到 Edge 或 Chrome 浏览器")
+        exit(1)
+
     try:
-        kill_edge()
-        start_edge_debug()
+        print(f"使用 {browser['name']}...")
+        kill_browser(browser["process"])
+        start_browser_debug(browser, browser_path)
         cookies = get_cookies_via_cdp()
         if cookies:
             update_config(cookies)
             print("成功！")
         else:
-            print("未获取到 cookies，请先在 Edge 中登录 Mimo")
+            print(f"未获取到 cookies，请先在 {browser['name']} 中登录 Mimo")
     except Exception as e:
         print(f"失败: {e}")
     finally:
-        kill_edge()
+        kill_browser(browser["process"])
