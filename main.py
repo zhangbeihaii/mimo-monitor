@@ -278,102 +278,28 @@ class AutoCookieWorker(QThread):
     finished = pyqtSignal(bool, str)
 
     def run(self):
+        script = os.path.join(os.path.dirname(os.path.abspath(__file__)), "auto_cookies.py")
         try:
-            import requests
-            import websocket
-        except ImportError as e:
-            self.finished.emit(False, f"缺少依赖: {e}")
-            return
-
-        DEBUG_PORT = 9222
-        edge_path = None
-        for p in [
-            r"C:\Program Files (x86)\Microsoft\Edge\Application\msedge.exe",
-            r"C:\Program Files\Microsoft\Edge\Application\msedge.exe",
-        ]:
-            if os.path.exists(p):
-                edge_path = p
-                break
-        if not edge_path:
-            self.finished.emit(False, "找不到 Edge 浏览器")
-            return
-
-        user_data = os.path.join(os.environ["LOCALAPPDATA"], "Microsoft", "Edge", "User Data")
-
-        try:
-            # 先检查调试端口是否已开
-            already_debug = False
-            try:
-                resp = requests.get(f"http://localhost:{DEBUG_PORT}/json", timeout=2)
-                if resp.status_code == 200:
-                    already_debug = True
-            except:
-                pass
-
-            if not already_debug:
-                # 非阻塞关闭 Edge
-                subprocess.Popen(["taskkill", "/IM", "msedge.exe"],
-                               stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
-                time.sleep(3)
-
-                # 调试模式启动
-                subprocess.Popen([
-                    edge_path,
-                    f"--remote-debugging-port={DEBUG_PORT}",
-                    f"--user-data-dir={user_data}",
-                    "--profile-directory=Default",
-                    "--remote-allow-origins=*",
-                    "https://platform.xiaomimimo.com/console/plan-manage",
-                ])
-
-                # 等待调试端口就绪
-                for _ in range(20):
-                    time.sleep(1)
-                    try:
-                        r = requests.get(f"http://localhost:{DEBUG_PORT}/json", timeout=1)
-                        if r.status_code == 200:
-                            break
-                    except:
-                        pass
-
-            # 获取 cookies
-            resp = requests.get(f"http://localhost:{DEBUG_PORT}/json", timeout=10)
-            tabs = resp.json()
-            ws_url = None
-            for tab in tabs:
-                if "mimo" in tab.get("url", "").lower():
-                    ws_url = tab.get("webSocketDebuggerUrl")
-                    break
-            if not ws_url:
-                ws_url = tabs[0].get("webSocketDebuggerUrl") if tabs else None
-            if not ws_url:
-                raise RuntimeError("无法获取调试连接")
-
-            ws = websocket.create_connection(ws_url, timeout=10)
-            ws.send(json.dumps({
-                "id": 1,
-                "method": "Network.getCookies",
-                "params": {"urls": ["https://platform.xiaomimimo.com"]}
-            }))
-            result = json.loads(ws.recv())
-            ws.close()
-
-            cookies = result.get("result", {}).get("cookies", [])
-            mimo_cookies = []
-            for c in cookies:
-                name = c["name"]
-                value = c["value"].strip('"')
-                if "serviceToken" in name:
-                    mimo_cookies.append(f'{name}="{value}"')
+            result = subprocess.run(
+                [sys.executable, script],
+                capture_output=True, text=True, timeout=60
+            )
+            if result.returncode == 0:
+                # 从 AppData 读取更新后的 cookies
+                if os.name == 'nt':
+                    cfg = os.path.join(os.environ.get('APPDATA', ''), "MiMoMonitor", "config.json")
                 else:
-                    mimo_cookies.append(f"{name}={value}")
-
-            cookie_str = "; ".join(mimo_cookies)
-            if not cookie_str:
-                raise RuntimeError("未获取到 Cookies，请先在 Edge 中登录 Mimo")
-
-            self.finished.emit(True, cookie_str)
-
+                    cfg = os.path.join(os.path.expanduser('~'), '.config', "MiMoMonitor", "config.json")
+                with open(cfg, "r", encoding="utf-8") as f:
+                    cookies = json.load(f).get("mimo_cookies", "")
+                if cookies:
+                    self.finished.emit(True, cookies)
+                else:
+                    self.finished.emit(False, "未获取到 Cookies")
+            else:
+                self.finished.emit(False, result.stderr or result.stdout or "未知错误")
+        except subprocess.TimeoutExpired:
+            self.finished.emit(False, "超时")
         except Exception as e:
             self.finished.emit(False, str(e))
 
