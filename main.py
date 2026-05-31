@@ -300,20 +300,30 @@ class AutoCookieWorker(QThread):
         user_data = os.path.join(os.environ["LOCALAPPDATA"], "Microsoft", "Edge", "User Data")
 
         try:
-            # 关闭 Edge（不用 /F 避免杀其他进程）
-            subprocess.run(["taskkill", "/IM", "msedge.exe"], capture_output=True)
-            time.sleep(2)
+            # 先检查 9222 端口是否已开（Edge 可能已在调试模式）
+            already_debug = False
+            try:
+                resp = requests.get(f"http://localhost:{DEBUG_PORT}/json", timeout=2)
+                if resp.status_code == 200:
+                    already_debug = True
+            except:
+                pass
 
-            # 调试模式启动
-            proc = subprocess.Popen([
-                edge_path,
-                f"--remote-debugging-port={DEBUG_PORT}",
-                f"--user-data-dir={user_data}",
-                "--profile-directory=Default",
-                "--remote-allow-origins=*",
-                "https://platform.xiaomimimo.com/console/plan-manage",
-            ])
-            time.sleep(5)
+            if not already_debug:
+                # 用 os.system 关闭 Edge
+                os.system("taskkill /IM msedge.exe >nul 2>&1")
+                time.sleep(2)
+
+                # 调试模式启动
+                subprocess.Popen([
+                    edge_path,
+                    f"--remote-debugging-port={DEBUG_PORT}",
+                    f"--user-data-dir={user_data}",
+                    "--profile-directory=Default",
+                    "--remote-allow-origins=*",
+                    "https://platform.xiaomimimo.com/console/plan-manage",
+                ])
+                time.sleep(5)
 
             # 获取 cookies
             resp = requests.get(f"http://localhost:{DEBUG_PORT}/json", timeout=10)
@@ -355,9 +365,6 @@ class AutoCookieWorker(QThread):
 
         except Exception as e:
             self.finished.emit(False, str(e))
-        finally:
-            # 不恢复 Edge，让用户自己打开
-            pass
 
 
 # ---------- 标签页按钮 ----------
