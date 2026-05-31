@@ -951,16 +951,15 @@ class MainWindow(QMainWindow):
             self.show_and_raise()
 
     def show_and_raise(self):
+        self.setWindowState(Qt.WindowNoState)
         self.showNormal()
         self.setMinimumSize(580, 680)
         self.resize(580, 700)
-        # 延迟确保布局计算完成
-        QTimer.singleShot(50, lambda: (self.resize(580, 700), self.updateGeometry()))
         self.activateWindow()
         self.raise_()
 
     def switch_to_float(self):
-        self.hide()
+        self.setWindowState(Qt.WindowMinimized)
         self.float_win.move(self.x(), self.y())
         self.float_win.show()
         if self._last_data:
