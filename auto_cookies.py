@@ -113,3 +113,5 @@ if __name__ == "__main__":
             print("未获取到 cookies，请先在 Edge 中登录 Mimo")
     except Exception as e:
         print(f"失败: {e}")
+    finally:
+        kill_edge()
