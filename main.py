@@ -41,114 +41,147 @@ os.makedirs(CONFIG_DIR, exist_ok=True)
 CONFIG_FILE = os.path.join(CONFIG_DIR, "config.json")
 REFRESH_INTERVAL_MS = 5 * 60 * 1000
 
-CARD_STYLE = """
-QFrame#card {
-    background: rgba(255, 255, 255, 0.7);
-    border: 1px solid rgba(255, 255, 255, 0.8);
-    border-radius: 16px;
-}
-"""
+# ---------- 主题系统 ----------
 
-GLOBAL_STYLE = """
-QMainWindow {
-    background: qlineargradient(x1:0, y1:0, x2:1, y2:1,
-        stop:0 #667eea, stop:1 #764ba2);
+THEMES = {
+    "purple": {
+        "name": "紫色",
+        "card": """
+            QFrame#card {
+                background: rgba(255, 255, 255, 0.7);
+                border: 1px solid rgba(255, 255, 255, 0.8);
+                border-radius: 16px;
+            }
+        """,
+        "global": """
+            QMainWindow {
+                background: qlineargradient(x1:0, y1:0, x2:1, y2:1,
+                    stop:0 #667eea, stop:1 #764ba2);
+            }
+            QLabel { font-family: "Microsoft YaHei", "Segoe UI", sans-serif; }
+            QPushButton {
+                font-family: "Microsoft YaHei", "Segoe UI", sans-serif;
+                background: rgba(255, 255, 255, 0.9);
+                border: 1px solid rgba(255, 255, 255, 0.5);
+                border-radius: 12px; padding: 10px 24px; font-size: 13px; color: #333;
+            }
+            QPushButton:hover { background: rgba(255, 255, 255, 1); border: 1px solid rgba(255, 255, 255, 0.8); }
+            QPushButton:pressed { background: rgba(240, 240, 245, 0.9); }
+            QPushButton#primary {
+                background: qlineargradient(x1:0, y1:0, x2:1, y2:0, stop:0 #667eea, stop:1 #764ba2);
+                color: white; border: none; font-weight: bold;
+            }
+            QPushButton#primary:hover { background: qlineargradient(x1:0, y1:0, x2:1, y2:0, stop:0 #5a6fd6, stop:1 #6a4190); }
+            QPushButton#refresh {
+                background: qlineargradient(x1:0, y1:0, x2:1, y2:0, stop:0 #11998e, stop:1 #38ef7d);
+                color: white; border: none; font-weight: bold;
+            }
+            QPushButton#refresh:hover { background: qlineargradient(x1:0, y1:0, x2:1, y2:0, stop:0 #0e8a7f, stop:1 #32d970); }
+            QPushButton#refresh:disabled { background: rgba(150, 220, 180, 0.6); }
+            QProgressBar { border: none; border-radius: 8px; background: rgba(255, 255, 255, 0.3); height: 14px; text-align: center; font-size: 10px; color: white; }
+            QProgressBar::chunk { border-radius: 8px; background: qlineargradient(x1:0, y1:0, x2:1, y2:0, stop:0 #667eea, stop:1 #764ba2); }
+            QDialog { background: qlineargradient(x1:0, y1:0, x2:1, y2:1, stop:0 #667eea, stop:1 #764ba2); font-family: "Microsoft YaHei", "Segoe UI", sans-serif; }
+            QLineEdit { border: 1px solid rgba(255, 255, 255, 0.4); border-radius: 12px; padding: 10px 16px; font-size: 13px; background: rgba(255, 255, 255, 0.8); }
+            QLineEdit:focus { border: 2px solid rgba(255, 255, 255, 0.8); background: rgba(255, 255, 255, 0.95); }
+            QComboBox { border: 1px solid rgba(255, 255, 255, 0.3); border-radius: 8px; padding: 6px 12px; font-size: 11px; background: rgba(255, 255, 255, 0.2); color: white; }
+            QComboBox::drop-down { border: none; width: 20px; }
+            QComboBox QAbstractItemView { background: #2D2D3F; color: white; border: 1px solid rgba(255, 255, 255, 0.3); selection-background-color: #667eea; selection-color: white; outline: none; }
+        """,
+        "text_primary": "white",
+        "text_secondary": "rgba(255, 255, 255, 0.7)",
+        "text_muted": "rgba(0, 0, 0, 0.5)",
+        "title_color": "white",
+        "header_btn": """
+            QPushButton { background: rgba(255, 255, 255, 0.2); border: 1px solid rgba(255, 255, 255, 0.3);
+                          border-radius: 8px; padding: 6px 16px; font-size: 12px; color: white; }
+            QPushButton:hover { background: rgba(255, 255, 255, 0.3); }
+        """,
+        "footer_btn": """
+            font-size: 11px; padding: 6px 12px;
+            background: rgba(255, 255, 255, 0.2);
+            color: white;
+            border: 1px solid rgba(255, 255, 255, 0.3);
+        """,
+        "combo_style": """
+            QComboBox { border: 1px solid rgba(255, 255, 255, 0.3); border-radius: 8px; padding: 6px 12px; font-size: 11px; background: rgba(255, 255, 255, 0.2); color: white; }
+            QComboBox::drop-down { border: none; width: 20px; }
+            QComboBox QAbstractItemView { background: #2D2D3F; color: white; border: 1px solid rgba(255, 255, 255, 0.3); selection-background-color: #667eea; selection-color: white; outline: none; }
+        """,
+        "status_ok": "#38ef7d",
+        "status_err": "#ff6b6b",
+        "status_warn": "#ffd43b",
+        "plan_color": "#FF9500",
+        "comp_color": "#5856D6",
+        "delta_inc": "#ff6b6b",
+        "delta_dec": "#69db7c",
+        "big_number": "white",
+    },
+    "white": {
+        "name": "白色",
+        "card": """
+            QFrame#card {
+                background: white;
+                border: 1px solid #E5E5E5;
+                border-radius: 12px;
+            }
+        """,
+        "global": """
+            QMainWindow { background: #F5F5F7; }
+            QLabel { font-family: "Microsoft YaHei", "Segoe UI", sans-serif; }
+            QPushButton {
+                font-family: "Microsoft YaHei", "Segoe UI", sans-serif;
+                background: #FFFFFF; border: 1px solid #D1D1D6; border-radius: 8px;
+                padding: 8px 20px; font-size: 13px; color: #333;
+            }
+            QPushButton:hover { background: #F0F0F0; }
+            QPushButton:pressed { background: #E5E5EA; }
+            QPushButton#primary { background: #007AFF; color: white; border: none; }
+            QPushButton#primary:hover { background: #0056CC; }
+            QPushButton#refresh { background: #34C759; color: white; border: none; font-weight: bold; }
+            QPushButton#refresh:hover { background: #2DA44E; }
+            QPushButton#refresh:disabled { background: #A8DAB5; }
+            QProgressBar { border: none; border-radius: 6px; background: #E8E8ED; height: 12px; text-align: center; font-size: 10px; color: #666; }
+            QProgressBar::chunk { border-radius: 6px; }
+            QDialog { background: #F5F5F7; font-family: "Microsoft YaHei", "Segoe UI", sans-serif; }
+            QLineEdit { border: 1px solid #D1D1D6; border-radius: 8px; padding: 8px 12px; font-size: 13px; background: white; }
+            QLineEdit:focus { border: 2px solid #007AFF; }
+            QComboBox { border: 1px solid #D1D1D6; border-radius: 6px; padding: 4px 8px; font-size: 11px; background: white; color: #333; }
+            QComboBox::drop-down { border: none; width: 20px; }
+            QComboBox QAbstractItemView { background: white; color: #333; border: 1px solid #D1D1D6; selection-background-color: #007AFF; selection-color: white; outline: none; }
+        """,
+        "text_primary": "#1D1D1F",
+        "text_secondary": "#888",
+        "text_muted": "#888",
+        "title_color": "#1D1D1F",
+        "header_btn": """
+            QPushButton { background: #F0F0F0; border: 1px solid #D1D1D6; border-radius: 6px;
+                          padding: 4px 12px; font-size: 12px; color: #555; }
+            QPushButton:hover { background: #E5E5EA; }
+        """,
+        "footer_btn": "font-size: 11px; padding: 4px 8px;",
+        "combo_style": """
+            QComboBox { border: 1px solid #D1D1D6; border-radius: 6px; padding: 4px 8px; font-size: 11px; background: white; color: #333; }
+            QComboBox::drop-down { border: none; width: 20px; }
+            QComboBox QAbstractItemView { background: white; color: #333; border: 1px solid #D1D1D6; selection-background-color: #007AFF; selection-color: white; outline: none; }
+        """,
+        "status_ok": "#34C759",
+        "status_err": "#FF3B30",
+        "status_warn": "#FF9500",
+        "plan_color": "#FF9500",
+        "comp_color": "#5856D6",
+        "delta_inc": "#FF3B30",
+        "delta_dec": "#34C759",
+        "big_number": "#1D1D1F",
+    },
 }
-QLabel {
-    font-family: "Microsoft YaHei", "Segoe UI", sans-serif;
-}
-QPushButton {
-    font-family: "Microsoft YaHei", "Segoe UI", sans-serif;
-    background: rgba(255, 255, 255, 0.9);
-    border: 1px solid rgba(255, 255, 255, 0.5);
-    border-radius: 12px;
-    padding: 10px 24px;
-    font-size: 13px;
-    color: #333;
-}
-QPushButton:hover {
-    background: rgba(255, 255, 255, 1);
-    border: 1px solid rgba(255, 255, 255, 0.8);
-}
-QPushButton:pressed {
-    background: rgba(240, 240, 245, 0.9);
-}
-QPushButton#primary {
-    background: qlineargradient(x1:0, y1:0, x2:1, y2:0,
-        stop:0 #667eea, stop:1 #764ba2);
-    color: white;
-    border: none;
-    font-weight: bold;
-}
-QPushButton#primary:hover {
-    background: qlineargradient(x1:0, y1:0, x2:1, y2:0,
-        stop:0 #5a6fd6, stop:1 #6a4190);
-}
-QPushButton#refresh {
-    background: qlineargradient(x1:0, y1:0, x2:1, y2:0,
-        stop:0 #11998e, stop:1 #38ef7d);
-    color: white;
-    border: none;
-    font-weight: bold;
-}
-QPushButton#refresh:hover {
-    background: qlineargradient(x1:0, y1:0, x2:1, y2:0,
-        stop:0 #0e8a7f, stop:1 #32d970);
-}
-QPushButton#refresh:disabled {
-    background: rgba(150, 220, 180, 0.6);
-}
-QProgressBar {
-    border: none;
-    border-radius: 8px;
-    background: rgba(255, 255, 255, 0.3);
-    height: 14px;
-    text-align: center;
-    font-size: 10px;
-    color: white;
-}
-QProgressBar::chunk {
-    border-radius: 8px;
-    background: qlineargradient(x1:0, y1:0, x2:1, y2:0,
-        stop:0 #667eea, stop:1 #764ba2);
-}
-QDialog {
-    background: qlineargradient(x1:0, y1:0, x2:1, y2:1,
-        stop:0 #667eea, stop:1 #764ba2);
-    font-family: "Microsoft YaHei", "Segoe UI", sans-serif;
-}
-QLineEdit {
-    border: 1px solid rgba(255, 255, 255, 0.4);
-    border-radius: 12px;
-    padding: 10px 16px;
-    font-size: 13px;
-    background: rgba(255, 255, 255, 0.8);
-}
-QLineEdit:focus {
-    border: 2px solid rgba(255, 255, 255, 0.8);
-    background: rgba(255, 255, 255, 0.95);
-}
-QComboBox {
-    border: 1px solid rgba(255, 255, 255, 0.3);
-    border-radius: 8px;
-    padding: 6px 12px;
-    font-size: 11px;
-    background: rgba(255, 255, 255, 0.2);
-    color: white;
-}
-QComboBox::drop-down {
-    border: none;
-    width: 20px;
-}
-QComboBox QAbstractItemView {
-    background: #2D2D3F;
-    color: white;
-    border: 1px solid rgba(255, 255, 255, 0.3);
-    selection-background-color: #667eea;
-    selection-color: white;
-    outline: none;
-}
-"""
+
+CURRENT_THEME = "purple"
+
+def get_theme():
+    return THEMES[CURRENT_THEME]
+
+CARD_STYLE = THEMES[CURRENT_THEME]["card"]
+GLOBAL_STYLE = THEMES[CURRENT_THEME]["global"]
 
 
 def load_config() -> dict:
@@ -196,16 +229,19 @@ def make_shadow():
 def make_card() -> QFrame:
     card = QFrame()
     card.setObjectName("card")
-    card.setStyleSheet(CARD_STYLE)
+    card.setStyleSheet(get_theme()["card"])
     card.setGraphicsEffect(make_shadow())
     return card
 
 
-def make_info_row(label_text: str, color: str = "#666") -> tuple:
+def make_info_row(label_text: str, color: str = None) -> tuple:
     """创建一行：标签 + 数值"""
+    t = get_theme()
+    if color is None:
+        color = t["text_secondary"]
     row = QHBoxLayout()
     lbl = QLabel(label_text)
-    lbl.setStyleSheet(f"font-size: 13px; color: rgba(0, 0, 0, 0.5);")
+    lbl.setStyleSheet(f"font-size: 13px; color: {t['text_secondary']};")
     val = QLabel("--")
     val.setStyleSheet(f"font-size: 13px; font-weight: bold; color: {color};")
     val.setAlignment(Qt.AlignRight | Qt.AlignVCenter)
@@ -216,9 +252,10 @@ def make_info_row(label_text: str, color: str = "#666") -> tuple:
 
 def make_section_bar(title: str, color: str) -> tuple:
     """创建一个带标题、大数字、进度条、详情行的区域"""
+    t = get_theme()
     container = QFrame()
     container.setObjectName("card")
-    container.setStyleSheet(CARD_STYLE)
+    container.setStyleSheet(t["card"])
     container.setGraphicsEffect(make_shadow())
 
     layout = QVBoxLayout(container)
@@ -230,12 +267,12 @@ def make_section_bar(title: str, color: str) -> tuple:
     layout.addWidget(title_lbl)
 
     big = QLabel("--")
-    big.setStyleSheet(f"font-size: 32px; font-weight: bold; color: #1D1D1F;")
+    big.setStyleSheet(f"font-size: 32px; font-weight: bold; color: {t['big_number']};")
     big.setAlignment(Qt.AlignCenter)
     layout.addWidget(big)
 
     sub = QLabel("")
-    sub.setStyleSheet("font-size: 12px; color: rgba(0, 0, 0, 0.5);")
+    sub.setStyleSheet(f"font-size: 12px; color: {t['text_secondary']};")
     sub.setAlignment(Qt.AlignCenter)
     layout.addWidget(sub)
 
@@ -245,7 +282,7 @@ def make_section_bar(title: str, color: str) -> tuple:
     bar.setTextVisible(False)
     bar.setFixedHeight(8)
     bar.setStyleSheet(f"""
-        QProgressBar {{ background: rgba(0, 0, 0, 0.1); border-radius: 4px; }}
+        QProgressBar {{ background: rgba(128, 128, 128, 0.2); border-radius: 4px; }}
         QProgressBar::chunk {{ background: {color}; border-radius: 4px; }}
     """)
     layout.addWidget(bar)
@@ -696,7 +733,6 @@ class MainWindow(QMainWindow):
         super().__init__()
         self.setWindowTitle("MiMo Monitor v1.2")
         self.setMinimumSize(580, 680)
-        # 设置窗口图标
         icon_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "icon.ico")
         if os.path.exists(icon_path):
             self.setWindowIcon(QIcon(icon_path))
@@ -706,6 +742,11 @@ class MainWindow(QMainWindow):
         self._last_data = {}
         self.float_win = FloatingWindow(self)
 
+        # 加载主题
+        global CURRENT_THEME
+        CURRENT_THEME = self.config.get("theme", "purple")
+        t = get_theme()
+
         central = QWidget()
         self.setCentralWidget(central)
         main_layout = QVBoxLayout(central)
@@ -714,18 +755,19 @@ class MainWindow(QMainWindow):
 
         # 顶部标题栏
         header = QHBoxLayout()
-        title = QLabel("MiMo Monitor")
-        title.setStyleSheet("font-size: 24px; font-weight: bold; color: white;")
-        header.addWidget(title)
+        self.title_lbl = QLabel("MiMo Monitor")
+        self.title_lbl.setStyleSheet(f"font-size: 24px; font-weight: bold; color: {t['title_color']};")
+        header.addWidget(self.title_lbl)
         header.addStretch()
+
+        self.theme_btn = QPushButton()
+        self.theme_btn.setFixedHeight(30)
+        self.theme_btn.clicked.connect(self.toggle_theme)
+        header.addWidget(self.theme_btn)
 
         self.float_btn = QPushButton("悬浮窗")
         self.float_btn.setFixedHeight(30)
-        self.float_btn.setStyleSheet("""
-            QPushButton { background: rgba(255, 255, 255, 0.2); border: 1px solid rgba(255, 255, 255, 0.3);
-                          border-radius: 8px; padding: 6px 16px; font-size: 12px; color: white; }
-            QPushButton:hover { background: rgba(255, 255, 255, 0.3); }
-        """)
+        self.float_btn.setStyleSheet(t["header_btn"])
         self.float_btn.clicked.connect(self.switch_to_float)
         header.addWidget(self.float_btn)
 
@@ -741,14 +783,14 @@ class MainWindow(QMainWindow):
         # 底部状态栏
         footer = QHBoxLayout()
         self.status_label = QLabel("就绪")
-        self.status_label.setStyleSheet("font-size: 11px; color: rgba(255, 255, 255, 0.7);")
+        self.status_label.setStyleSheet(f"font-size: 11px; color: {t['text_secondary']};")
         footer.addWidget(self.status_label)
 
         footer.addStretch()
 
         # 刷新间隔选择
         self.interval_label = QLabel("自动刷新时间：")
-        self.interval_label.setStyleSheet("font-size: 11px; color: rgba(255, 255, 255, 0.7);")
+        self.interval_label.setStyleSheet(f"font-size: 11px; color: {t['text_secondary']};")
         footer.addWidget(self.interval_label)
 
         self.interval_combo = QComboBox()
@@ -770,38 +812,13 @@ class MainWindow(QMainWindow):
             if ms == saved_interval:
                 self.interval_combo.setCurrentIndex(i)
                 break
-        self.interval_combo.setStyleSheet("""
-            QComboBox {
-                border: 1px solid rgba(255, 255, 255, 0.3);
-                border-radius: 8px;
-                padding: 6px 12px;
-                font-size: 11px;
-                background: rgba(255, 255, 255, 0.2);
-                color: white;
-            }
-            QComboBox QAbstractItemView {
-                background: #2D2D3F;
-                color: white;
-                border: 1px solid rgba(255, 255, 255, 0.3);
-                selection-background-color: #667eea;
-                selection-color: white;
-            }
-            QComboBox::drop-down {
-                border: none;
-                width: 20px;
-            }
-        """)
+        self.interval_combo.setStyleSheet(t["combo_style"])
         self.interval_combo.currentIndexChanged.connect(self.on_interval_changed)
         footer.addWidget(self.interval_combo)
 
         self.toggle_btn = QPushButton("暂停")
         self.toggle_btn.setFixedWidth(50)
-        self.toggle_btn.setStyleSheet("""
-            font-size: 11px; padding: 6px 12px;
-            background: rgba(255, 255, 255, 0.2);
-            color: white;
-            border: 1px solid rgba(255, 255, 255, 0.3);
-        """)
+        self.toggle_btn.setStyleSheet(t["footer_btn"])
         self.toggle_btn.clicked.connect(self.toggle_auto)
         footer.addWidget(self.toggle_btn)
 
@@ -824,7 +841,36 @@ class MainWindow(QMainWindow):
         # 首次加载
         QTimer.singleShot(500, self.refresh)
 
+        # 更新主题按钮
+        self._update_theme_btn()
 
+    def _update_theme_btn(self):
+        t = get_theme()
+        other = "白色" if CURRENT_THEME == "purple" else "紫色"
+        self.theme_btn.setText(f"🎨 {other}")
+        self.theme_btn.setStyleSheet(t["header_btn"])
+
+    def toggle_theme(self):
+        global CURRENT_THEME
+        CURRENT_THEME = "white" if CURRENT_THEME == "purple" else "purple"
+        self.config["theme"] = CURRENT_THEME
+        save_config(self.config)
+        self._apply_theme()
+
+    def _apply_theme(self):
+        t = get_theme()
+        app = QApplication.instance()
+        app.setStyleSheet(t["global"])
+        self.title_lbl.setStyleSheet(f"font-size: 24px; font-weight: bold; color: {t['title_color']};")
+        self.status_label.setStyleSheet(f"font-size: 11px; color: {t['text_secondary']};")
+        self.interval_label.setStyleSheet(f"font-size: 11px; color: {t['text_secondary']};")
+        self.interval_combo.setStyleSheet(t["combo_style"])
+        self.toggle_btn.setStyleSheet(t["footer_btn"])
+        self.float_btn.setStyleSheet(t["header_btn"])
+        self._update_theme_btn()
+        # 刷新详情面板
+        if self._last_data:
+            self._update_panels(self._last_data)
 
     def setup_tray(self):
         self.tray = QSystemTrayIcon(self)
@@ -929,7 +975,7 @@ class MainWindow(QMainWindow):
         self.refresh_btn.setEnabled(False)
         self.refresh_btn.setText("获取中...")
         self.status_label.setText("正在获取数据...")
-        self.status_label.setStyleSheet("font-size: 11px; color: rgba(255, 255, 255, 0.7);")
+        self.status_label.setStyleSheet(f"font-size: 11px; color: {get_theme()['text_secondary']};")
 
         self.worker = FetchWorker(
             self.config.get("mimo_cookies", ""),
@@ -938,11 +984,12 @@ class MainWindow(QMainWindow):
         self.worker.start()
 
     def on_data(self, data: dict):
+        t = get_theme()
         self.refresh_btn.setEnabled(True)
         self.refresh_btn.setText("↻ 刷新")
         now_str = time.strftime("%H:%M:%S")
         self.status_label.setText(f"上次更新: {now_str}")
-        self.status_label.setStyleSheet("font-size: 11px; color: #38ef7d;")
+        self.status_label.setStyleSheet(f"font-size: 11px; color: {t['status_ok']};")
 
         self._last_data = data
         self._update_panels(data)
