@@ -301,7 +301,7 @@ class AutoCookieWorker(QThread):
         user_data = os.path.join(os.environ["LOCALAPPDATA"], "Microsoft", "Edge", "User Data")
 
         try:
-            # 先检查 9222 端口是否已开（Edge 可能已在调试模式）
+            # 先检查调试端口是否已开
             already_debug = False
             try:
                 resp = requests.get(f"http://localhost:{DEBUG_PORT}/json", timeout=2)
@@ -311,10 +311,10 @@ class AutoCookieWorker(QThread):
                 pass
 
             if not already_debug:
-                # 关闭 Edge
-                subprocess.run(["taskkill", "/IM", "msedge.exe"],
-                             capture_output=True, timeout=5)
-                time.sleep(2)
+                # 非阻塞关闭 Edge
+                subprocess.Popen(["taskkill", "/IM", "msedge.exe"],
+                               stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+                time.sleep(3)
 
                 # 调试模式启动
                 subprocess.Popen([
@@ -327,7 +327,7 @@ class AutoCookieWorker(QThread):
                 ])
 
                 # 等待调试端口就绪
-                for _ in range(15):
+                for _ in range(20):
                     time.sleep(1)
                     try:
                         r = requests.get(f"http://localhost:{DEBUG_PORT}/json", timeout=1)
