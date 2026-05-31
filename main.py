@@ -953,7 +953,9 @@ class MainWindow(QMainWindow):
     def show_and_raise(self):
         self.showNormal()
         self.setMinimumSize(580, 680)
-        self.resize(580, 680)
+        self.resize(580, 700)
+        # 延迟确保布局计算完成
+        QTimer.singleShot(50, lambda: (self.resize(580, 700), self.updateGeometry()))
         self.activateWindow()
         self.raise_()
 
