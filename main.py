@@ -759,6 +759,17 @@ class MainWindow(QMainWindow):
                 background: rgba(255, 255, 255, 0.2);
                 color: white;
             }
+            QComboBox QAbstractItemView {
+                background: #2D2D3F;
+                color: white;
+                border: 1px solid rgba(255, 255, 255, 0.3);
+                selection-background-color: #667eea;
+                selection-color: white;
+            }
+            QComboBox::drop-down {
+                border: none;
+                width: 20px;
+            }
         """)
         self.interval_combo.currentIndexChanged.connect(self.on_interval_changed)
         footer.addWidget(self.interval_combo)
