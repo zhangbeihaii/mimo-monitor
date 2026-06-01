@@ -4,6 +4,9 @@ import subprocess
 import sys
 import time
 
+# 修复 OpenSSL legacy provider 问题
+os.environ["CRYPTOGRAPHY_OPENSSL_NO_LEGACY"] = "1"
+
 from PyQt5.QtCore import Qt, QThread, pyqtSignal, QTimer, QSize, QPropertyAnimation, QEasingCurve
 from PyQt5.QtGui import QIcon, QPixmap, QPainter, QColor, QFont, QPen, QBrush
 from PyQt5.QtWidgets import (

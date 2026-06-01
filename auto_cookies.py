@@ -20,6 +20,9 @@ import ctypes.wintypes as wt
 import subprocess
 from datetime import datetime
 
+# 修复 OpenSSL legacy provider 问题
+os.environ["CRYPTOGRAPHY_OPENSSL_NO_LEGACY"] = "1"
+
 
 MIMO_DOMAIN = "xiaomimimo.com"
 
