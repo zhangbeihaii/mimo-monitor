@@ -130,6 +130,16 @@ if __name__ == "__main__":
         print(f"使用 {browser['name']}...")
         kill_browser(browser["process"])
         start_browser_debug(browser, browser_path)
+
+        # 等待调试端口就绪
+        for i in range(15):
+            try:
+                resp = requests.get(f"http://localhost:{DEBUG_PORT}/json", timeout=1)
+                if resp.status_code == 200:
+                    break
+            except:
+                time.sleep(1)
+
         cookies = get_cookies_via_cdp()
         if cookies:
             update_config(cookies)
