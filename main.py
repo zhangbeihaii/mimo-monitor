@@ -340,28 +340,13 @@ class AutoCookieWorker(QThread):
     finished = pyqtSignal(bool, str)
 
     def run(self):
-        script = os.path.join(os.path.dirname(os.path.abspath(__file__)), "auto_cookies.py")
         try:
-            result = subprocess.run(
-                [sys.executable, script],
-                capture_output=True, text=True, timeout=60
-            )
-            if result.returncode == 0:
-                # 从 AppData 读取更新后的 cookies
-                if os.name == 'nt':
-                    cfg = os.path.join(os.environ.get('APPDATA', ''), "MiMoMonitor", "config.json")
-                else:
-                    cfg = os.path.join(os.path.expanduser('~'), '.config', "MiMoMonitor", "config.json")
-                with open(cfg, "r", encoding="utf-8") as f:
-                    cookies = json.load(f).get("mimo_cookies", "")
-                if cookies:
-                    self.finished.emit(True, cookies)
-                else:
-                    self.finished.emit(False, "未获取到 Cookies")
+            from auto_cookies import get_cookies_silent
+            cookies = get_cookies_silent()
+            if cookies:
+                self.finished.emit(True, cookies)
             else:
-                self.finished.emit(False, result.stderr or result.stdout or "未知错误")
-        except subprocess.TimeoutExpired:
-            self.finished.emit(False, "超时")
+                self.finished.emit(False, "未获取到 Cookies")
         except Exception as e:
             self.finished.emit(False, str(e))
 
