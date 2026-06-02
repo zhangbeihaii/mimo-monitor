@@ -12,7 +12,12 @@ RESULT_FILE = r"@RESULT_FILE@"
 LOG_FILE = RESULT_FILE + ".log"
 
 log_lines = []
-MIMO_DOMAIN = "xiaomimimo.com"
+MIMO_DOMAINS = ["xiaomimimo.com", "xiaomi.com", "mi.com"]
+REQUIRED_COOKIES = {
+    "serviceToken", "api-platform_serviceToken",
+    "api-platform_ph", "api-platform_slh",
+    "userId", "xiaomichatbot_ph",
+}
 
 
 def log(msg):
@@ -27,14 +32,18 @@ def main():
         log("rookiepy imported")
 
         # 用 rookiepy 获取 mimo cookies（需要管理员权限）
-        cookies = rookiepy.edge(domains=[MIMO_DOMAIN])
+        cookies = rookiepy.edge(domains=MIMO_DOMAINS)
         log(f"found {len(cookies)} cookies")
 
         # 格式化为 "name=value; name2=value2" 格式
+        seen = set()
         parts = []
         for c in cookies:
             name = c["name"]
-            value = c["value"]
+            if name not in REQUIRED_COOKIES or name in seen:
+                continue
+            value = c["value"].strip('"')
+            seen.add(name)
             if "servicetoken" in name.lower():
                 parts.append(f'{name}="{value}"')
             else:

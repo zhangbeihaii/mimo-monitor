@@ -504,10 +504,10 @@ class SettingsDialog(QDialog):
             "9. 粘贴到下方输入框（会自动去除双引号）")
 
     def auto_update_cookies(self):
-        """自动从 Edge 提取 Cookies"""
+        """自动从浏览器提取 Cookies"""
         reply = QMessageBox.question(
             self, "自动更新",
-            "将短暂关闭 Edge 浏览器以提取 Cookies，是否继续？",
+            "需要管理员权限读取浏览器 Cookies\n会弹出 UAC 确认，是否继续？",
             QMessageBox.Yes | QMessageBox.No
         )
         if reply != QMessageBox.Yes:

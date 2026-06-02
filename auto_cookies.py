@@ -24,7 +24,13 @@ from datetime import datetime
 os.environ["CRYPTOGRAPHY_OPENSSL_NO_LEGACY"] = "1"
 
 
-MIMO_DOMAIN = "xiaomimimo.com"
+MIMO_DOMAINS = ["xiaomimimo.com", "xiaomi.com", "mi.com"]
+# 只保留这些 cookie 名
+REQUIRED_COOKIES = {
+    "serviceToken", "api-platform_serviceToken",
+    "api-platform_ph", "api-platform_slh",
+    "userId", "xiaomichatbot_ph",
+}
 
 # ---------- Windows DPAPI ----------
 
@@ -115,21 +121,24 @@ def _extract_cookies_from_db(cookie_db: str, user_data: str) -> str:
 
     conn = sqlite3.connect(cookie_db)
     cursor = conn.cursor()
-    cursor.execute(
-        "SELECT host_key, name, encrypted_value FROM cookies WHERE host_key LIKE ?",
-        (f"%{MIMO_DOMAIN}%",)
-    )
+    conditions = " OR ".join([f"host_key LIKE '%{d}%'" for d in MIMO_DOMAINS])
+    cursor.execute(f"SELECT host_key, name, encrypted_value FROM cookies WHERE {conditions}")
     rows = cursor.fetchall()
     conn.close()
 
     if not rows:
         return ""
 
+    seen = set()
     parts = []
     for host, name, enc_val in rows:
+        if name not in REQUIRED_COOKIES or name in seen:
+            continue
         value = decrypt_cookie_value(enc_val, aes_key, host=host)
         if not value:
             continue
+        value = value.strip('"')
+        seen.add(name)
         if "servicetoken" in name.lower():
             parts.append(f'{name}="{value}"')
         else:
@@ -140,12 +149,12 @@ def _extract_cookies_from_db(cookie_db: str, user_data: str) -> str:
 def _try_direct_read(cookie_db: str, user_data: str) -> str:
     """方法1: 直接用 sqlite3 只读模式打开"""
     uri = "file:" + cookie_db.replace("\\", "/")
+    conditions = " OR ".join([f"host_key LIKE '%{d}%'" for d in MIMO_DOMAINS])
     for opts in ["?mode=ro", "?mode=ro&nolock=1", "?mode=ro&immutable=1"]:
         try:
             conn = sqlite3.connect(uri + opts, uri=True)
             cur = conn.cursor()
-            cur.execute("SELECT host_key, name, encrypted_value FROM cookies WHERE host_key LIKE ?",
-                        (f"%{MIMO_DOMAIN}%",))
+            cur.execute(f"SELECT host_key, name, encrypted_value FROM cookies WHERE {conditions}")
             rows = cur.fetchall()
             conn.close()
             if rows:
@@ -154,10 +163,15 @@ def _try_direct_read(cookie_db: str, user_data: str) -> str:
                     aes_key = get_encryption_key(user_data)
                 except Exception:
                     pass
+                seen = set()
                 parts = []
                 for host, name, enc_val in rows:
+                    if name not in REQUIRED_COOKIES or name in seen:
+                        continue
                     value = decrypt_cookie_value(enc_val, aes_key, host=host)
                     if value:
+                        value = value.strip('"')
+                        seen.add(name)
                         if "servicetoken" in name.lower():
                             parts.append(f'{name}="{value}"')
                         else:
@@ -305,7 +319,7 @@ def read_browser_cookies(browser_name: str, user_data: str) -> str:
     if result:
         return result
 
-    # 方法3: 管理员权限读
+    # 方法3: 管理员权限读（UAC）
     result = _try_admin_read(cookie_db, user_data)
     if result:
         return result
